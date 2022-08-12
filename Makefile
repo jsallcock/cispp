@@ -1,2 +1,5 @@
 build/out: build/out.o
-	$(CXX) src/component.cpp -o build/out
+	$(CXX) build/out.o -o build/out -std=c++17
+
+build/out.o: src/component.cpp
+	$(CXX) -c src/component.cpp -o build/out.o -std=c++17
