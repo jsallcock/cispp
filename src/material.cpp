@@ -1,1 +1,1 @@
-/* Dispersion info for different birefringent materials */
+/* Material properties */
