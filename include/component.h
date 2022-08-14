@@ -1,14 +1,13 @@
 
 #ifndef COMPONENT_H
 #define COMPONENT_H
+#include <string>
 #include <iostream>
 #include <cmath>
 #include <Eigen/Dense>
 
-using Eigen::Matrix;
 
-
-Matrix<double,4,4> rotation_matrix(double angle);
+Eigen::Matrix<double,4,4> rotation_matrix(double angle);
 
 
 /**
@@ -29,7 +28,7 @@ class Polariser
     : orientation(orientation), tx1(tx1), tx2(tx2)
     {}
 
-    Matrix<double,4,4> get_mueller_matrix();
+    Eigen::Matrix<double,4,4> get_mueller_matrix();
 };
 
 
@@ -62,6 +61,28 @@ class Retarder
 
 
 /**
+ * @brief Idealised waveplate, imparting constant delay regardless of ray wavelength or ray path. 
+ */
+class IdealWaveplate: public Retarder
+{
+    double delay;
+
+    public:
+
+    IdealWaveplate(double delay)
+    : delay(delay)
+    {}
+    
+    double get_delay()
+    {
+        return delay;
+    }
+
+    Eigen::Matrix<double,4,4> get_mueller_matrix();
+};
+
+
+/**
  * @brief Plane-parallel, uniaxial, birefringent crystal plate
  */
 class UniaxialCrystal: public Retarder
@@ -81,7 +102,9 @@ class UniaxialCrystal: public Retarder
     {}
     
     double get_delay(double wavelength, double inc_angle, double azim_angle);
-    Matrix<double,4,4> get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
+    Eigen::Matrix<double,4,4> get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
 };
+
+
 
 #endif

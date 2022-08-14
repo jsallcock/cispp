@@ -1,9 +1,9 @@
+#include <string>
 #include <iostream>
 #include <cmath>
 #include <Eigen/Dense>
 #include "../include/component.h"
 
-using Eigen::Matrix;
 /* Definitions of interferometer components */
 
 
@@ -12,12 +12,12 @@ using Eigen::Matrix;
  * @param angle angle of rotation in radians, anti-clockwise from x-axis.
  * @return rotation matrix
  */
-Matrix<double,4,4> rotation_matrix(double angle)
+Eigen::Matrix<double,4,4> rotation_matrix(double angle)
 {
     double a2 = 2 * angle;
     double s2 = sin(a2);
     double c2 = cos(a2);
-    Matrix<double,4,4> m;
+    Eigen::Matrix<double,4,4> m;
 
     m << 1,   0,   0,   0, 
          0,  c2,  s2,   0,
@@ -28,23 +28,47 @@ Matrix<double,4,4> rotation_matrix(double angle)
 }
 
 
-Matrix<double,4,4> Polariser::get_mueller_matrix()
+Eigen::Matrix<double,4,4> Polariser::get_mueller_matrix()
 {
     double tx1_sq = pow(tx1,2);
     double tx2_sq = pow(tx2,2);
     double sum = (tx1_sq + tx2_sq) / 2;
     double diff = (tx1_sq - tx2_sq) / 2;
     double prod = tx1 * tx2;
-    Matrix<double,4,4> m;
+    Eigen::Matrix<double,4,4> m;
 
     m <<  sum, diff,    0,    0, 
          diff,  sum,    0,    0,
             0,    0, prod,    0,
             0,    0,    0, prod;
 
-    Matrix<double,4,4> rotmat = rotation_matrix(orientation);
+    Eigen::Matrix<double,4,4> rotmat = rotation_matrix(orientation);
     return rotmat.transpose() * m * rotmat;
 };
+
+
+/**
+* @brief Calculate Mueller matrix for light ray
+*
+* TODO this method is ~the same for any retarder, so combine into one
+* 
+* @return interferometer delay in radians
+*/
+Eigen::Matrix<double,4,4> IdealWaveplate::get_mueller_matrix()
+{
+    double delay = get_delay();
+    double cdelay = contrast_inst * cos(delay);
+    double sdelay = contrast_inst * sin(delay);
+
+    Eigen::Matrix<double,4,4> m;
+    m << 1,       0,       0,       0,
+         0,       1,       0,       0,
+         0,       0,  cdelay,  sdelay,
+         0,       0, -sdelay,  cdelay;
+
+    Eigen::Matrix<double,4,4> rotmat = rotation_matrix(orientation);
+    return rotmat.transpose() * m * rotmat;
+}
 
 
 /**
@@ -78,63 +102,25 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
 
 
 /**
-    * @brief Calculate Mueller matrix for light ray
-    * 
-    * @param wavelength wavelength of light (metres)
-    * @param inc_angle incidence angle of the light (radians)
-    * @param azim_angle azimuthal angle of the light (radians) 
-    * @return Matrix<double,4,4> 
-    */
-Matrix<double,4,4> UniaxialCrystal::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
+* @brief Calculate Mueller matrix for light ray
+* 
+* @param wavelength wavelength of light (metres)
+* @param inc_angle incidence angle of the light (radians)
+* @param azim_angle azimuthal angle of the light (radians) 
+* @return Matrix<double,4,4> 
+*/
+Eigen::Matrix<double,4,4> UniaxialCrystal::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
 {
     double delay = get_delay(wavelength, inc_angle, azim_angle);
     double cdelay = contrast_inst * cos(delay);
     double sdelay = contrast_inst * sin(delay);
 
-    Matrix<double,4,4> m;
+    Eigen::Matrix<double,4,4> m;
     m << 1,       0,       0,       0,
          0,       1,       0,       0,
          0,       0,  cdelay,  sdelay,
          0,       0, -sdelay,  cdelay;
 
-    Matrix<double,4,4> rotmat = rotation_matrix(orientation);
+    Eigen::Matrix<double,4,4> rotmat = rotation_matrix(orientation);
     return rotmat.transpose() * m * rotmat;
-}
-
-
-// /**
-//  * @brief 
-//  * 
-//  * @param wavelength 
-//  * @param inc_angle 
-//  * @param azim_angle 
-//  * @param ne extraordinary refractive index of material at wavelength
-//  * @param no ordinary refractive index of material at wavelength
-//  * @param cut_angle crystal cut angle (radians)
-//  * @param thickness crystal thickness (metres)
-//  * @return double 
-//  */
-
-
-
-int main()
-{
-    // just testing for now
-    double wavelength = 465e-9; 
-    double inc_angle = 0; 
-    double azim_angle = 0; 
-    double ne = 1.2; 
-    double no = 1.4;
-    double cut_angle = 45 * M_PI / 180; 
-    double thickness = 1e-2;
-    std::string material = "a-BBO";
-    // double delay = calc_delay_uniaxial_crystal(wavelength, inc_angle, azim_angle, ne, no, cut_angle, thickness);
-    // std::cout << delay << std::endl;
-
-    Matrix<double,4,4> m = rotation_matrix(0);
-    Polariser p = Polariser(0);
-    std::cout << p.orientation << std::endl;
-    UniaxialCrystal c{thickness, cut_angle, material}; 
-    std::cout << c.orientation << '\n';
-    std::cout << c.get_delay(wavelength, inc_angle, azim_angle) << '\n';
 }
