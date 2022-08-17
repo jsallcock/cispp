@@ -1,4 +1,5 @@
-CXXFLAGS = -std=c++17
+CXXFLAGS := -std=c++17
+
 
 all: build/test_component build/test_camera build/test_instrument
 
@@ -26,7 +27,7 @@ build/camera.o: src/camera.cpp include/camera.h
 
 # instrument
 build/test_instrument: build/test_instrument.o build/instrument.o
-	$(CXX) $(CXXFLAGS) build/test_instrument.o build/instrument.o -o build/test_instrument
+	$(CXX) $(CXXFLAGS) build/test_instrument.o build/instrument.o -o build/test_instrument -lyaml-cpp
 
 build/test_instrument.o: tests/test_instrument.cpp include/instrument.h
 	$(CXX) $(CXXFLAGS) -c tests/test_instrument.cpp -o build/test_instrument.o

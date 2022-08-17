@@ -15,7 +15,16 @@ class Camera
     double cam_noise;
 
     /**
-    */
+     * @brief Construct a new Camera object
+     * 
+     * @param sensor_format_x 
+     * @param sensor_format_y 
+     * @param pixel_size 
+     * @param bit_depth 
+     * @param quantum_efficiency 
+     * @param epercount 
+     * @param cam_noise 
+     */
     Camera
     (
         int sensor_format_x,
@@ -33,6 +42,20 @@ class Camera
       quantum_efficiency(quantum_efficiency),
       epercount(epercount),
       cam_noise(cam_noise)
+    {}
+
+    /**
+     * @brief Construct a new Camera object
+     * 
+     */
+    Camera()
+    : sensor_format_x(1000),
+      sensor_format_y(1000), 
+      pixel_size(3.45e-6),
+      bit_depth(8),
+      quantum_efficiency(0.5),
+      epercount(1),
+      cam_noise(2)
     {}
 
     std::vector<double> get_pixel_positions_x();
