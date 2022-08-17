@@ -12,12 +12,12 @@
  * @param angle angle of rotation in radians, anti-clockwise from x-axis.
  * @return rotation matrix
  */
-Eigen::Matrix<double,4,4> rotation_matrix(double angle)
+Eigen::Matrix4d rotation_matrix(double angle)
 {
     double a2 = 2 * angle;
     double s2 = sin(a2);
     double c2 = cos(a2);
-    Eigen::Matrix<double,4,4> m;
+    Eigen::Matrix4d m;
 
     m << 1,   0,   0,   0, 
          0,  c2,  s2,   0,
@@ -28,21 +28,21 @@ Eigen::Matrix<double,4,4> rotation_matrix(double angle)
 }
 
 
-Eigen::Matrix<double,4,4> Polariser::get_mueller_matrix()
+Eigen::Matrix4d Polariser::get_mueller_matrix()
 {
     double tx1_sq = pow(tx1,2);
     double tx2_sq = pow(tx2,2);
     double sum = (tx1_sq + tx2_sq) / 2;
     double diff = (tx1_sq - tx2_sq) / 2;
     double prod = tx1 * tx2;
-    Eigen::Matrix<double,4,4> m;
+    Eigen::Matrix4d m;
 
     m <<  sum, diff,    0,    0, 
          diff,  sum,    0,    0,
             0,    0, prod,    0,
             0,    0,    0, prod;
 
-    Eigen::Matrix<double,4,4> rotmat = rotation_matrix(orientation);
+    Eigen::Matrix4d rotmat = rotation_matrix(orientation);
     return rotmat.transpose() * m * rotmat;
 };
 
@@ -54,19 +54,19 @@ Eigen::Matrix<double,4,4> Polariser::get_mueller_matrix()
 * 
 * @return interferometer delay in radians
 */
-Eigen::Matrix<double,4,4> IdealWaveplate::get_mueller_matrix()
+Eigen::Matrix4d IdealWaveplate::get_mueller_matrix()
 {
     double delay = get_delay();
     double cdelay = contrast_inst * cos(delay);
     double sdelay = contrast_inst * sin(delay);
 
-    Eigen::Matrix<double,4,4> m;
+    Eigen::Matrix4d m;
     m << 1,       0,       0,       0,
          0,       1,       0,       0,
          0,       0,  cdelay,  sdelay,
          0,       0, -sdelay,  cdelay;
 
-    Eigen::Matrix<double,4,4> rotmat = rotation_matrix(orientation);
+    Eigen::Matrix4d rotmat = rotation_matrix(orientation);
     return rotmat.transpose() * m * rotmat;
 }
 
@@ -107,20 +107,20 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
 * @param wavelength wavelength of light (metres)
 * @param inc_angle incidence angle of the light (radians)
 * @param azim_angle azimuthal angle of the light (radians) 
-* @return Matrix<double,4,4> 
+* @return Matrix4d 
 */
-Eigen::Matrix<double,4,4> UniaxialCrystal::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
+Eigen::Matrix4d UniaxialCrystal::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
 {
     double delay = get_delay(wavelength, inc_angle, azim_angle);
     double cdelay = contrast_inst * cos(delay);
     double sdelay = contrast_inst * sin(delay);
 
-    Eigen::Matrix<double,4,4> m;
+    Eigen::Matrix4d m;
     m << 1,       0,       0,       0,
          0,       1,       0,       0,
          0,       0,  cdelay,  sdelay,
          0,       0, -sdelay,  cdelay;
 
-    Eigen::Matrix<double,4,4> rotmat = rotation_matrix(orientation);
+    Eigen::Matrix4d rotmat = rotation_matrix(orientation);
     return rotmat.transpose() * m * rotmat;
 }

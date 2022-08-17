@@ -2,7 +2,7 @@
 #include "../include/camera.h"
 
 /**
- * @brief calculate x-coordinates of pixel centre positons
+ * @brief x-coordinates of camera pixel centres in metres
  * 
  * @return std::vector<double> 
  */
@@ -18,7 +18,7 @@ std::vector<double> Camera::get_pixel_positions_x()
 }
 
 /**
- * @brief calculate y-coordinates of pixel centre positons
+ * @brief y-coordinates of camera pixel centres in metres
  * 
  * @return std::vector<double> 
  */

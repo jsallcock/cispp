@@ -37,7 +37,7 @@ class Camera
 
     std::vector<double> get_pixel_positions_x();
     std::vector<double> get_pixel_positions_y();
-
+    void capture();
 };
 
 #endif
