@@ -10,10 +10,15 @@
 Eigen::Matrix<double,4,4> rotation_matrix(double angle);
 
 
+class Component
+{
+    public:
+};
+
 /**
  * @brief Linear polariser
  */
-class Polariser
+class Polariser: public Component
 {
     public:
     double orientation {0};
@@ -35,7 +40,7 @@ class Polariser
 /**
  * @brief Linear retarder base class
  */
-class Retarder
+class Retarder: public Component
 {
     public:
     double orientation {0};

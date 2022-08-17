@@ -1,5 +1,5 @@
-#ifndef COMPONENT_H
-#define COMPONENT_H
+#ifndef CAMERA_H
+#define CAMERA_H
 #include <vector>
 
 class Camera
