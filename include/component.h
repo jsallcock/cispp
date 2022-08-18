@@ -7,12 +7,21 @@
 #include <Eigen/Dense>
 
 
-Eigen::Matrix<double,4,4> rotation_matrix(double angle);
+Eigen::Matrix4d rotation_matrix(double angle);
 
 
 class Component
 {
     public:
+    double orientation {0};
+
+    Component(double orientation)
+    : orientation(orientation)
+    {}
+
+    virtual Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) = 0;
+
+    virtual ~Component() = default;
 };
 
 /**
@@ -21,19 +30,18 @@ class Component
 class Polariser: public Component
 {
     public:
-    double orientation {0};
     double tx1 {1};
     double tx2 {0};
 
     Polariser(double orientation)
-    : orientation(orientation)
+    : Component(orientation)
     {}
 
     Polariser(double orientation, double tx1, double tx2)
-    : orientation(orientation), tx1(tx1), tx2(tx2)
+    : Component(orientation), tx1(tx1), tx2(tx2)
     {}
 
-    Eigen::Matrix<double,4,4> get_mueller_matrix();
+    Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
 };
 
 
@@ -43,24 +51,20 @@ class Polariser: public Component
 class Retarder: public Component
 {
     public:
-    double orientation {0};
     double contrast_inst {1};
     double tilt_x {0};
     double tilt_y {0};
 
-    Retarder()
-    {}
-
     Retarder(double orientation)
-    : orientation(orientation)
+    : Component(orientation)
     {}
 
     Retarder(double orientation, double contrast_inst)
-    : orientation(orientation), contrast_inst(contrast_inst)
+    : Component(orientation), contrast_inst(contrast_inst)
     {}
 
     Retarder(double orientation, double contrast_inst, double tilt_x, double tilt_y)
-    : orientation(orientation), contrast_inst(contrast_inst), tilt_x(tilt_x), tilt_y(tilt_y)
+    : Component(orientation), contrast_inst(contrast_inst), tilt_x(tilt_x), tilt_y(tilt_y)
     {}
 };
 
@@ -74,16 +78,15 @@ class IdealWaveplate: public Retarder
 
     public:
 
-    IdealWaveplate(double delay)
-    : delay(delay)
+    IdealWaveplate(double orientation, double delay)
+    : Retarder(orientation), delay(delay)
     {}
     
-    double get_delay()
-    {
+    double get_delay(){
         return delay;
     }
 
-    Eigen::Matrix<double,4,4> get_mueller_matrix();
+    Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
 };
 
 
@@ -102,12 +105,12 @@ class UniaxialCrystal: public Retarder
 
     public:
 
-    UniaxialCrystal(double thickness, double cut_angle, std::string material)
-    : thickness(thickness), cut_angle(cut_angle), material(material)
+    UniaxialCrystal(double orientation, double thickness, double cut_angle, std::string material)
+    : Retarder(orientation), thickness(thickness), cut_angle(cut_angle), material(material)
     {}
     
     double get_delay(double wavelength, double inc_angle, double azim_angle);
-    Eigen::Matrix<double,4,4> get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
+    Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
 };
 
 

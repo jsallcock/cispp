@@ -28,7 +28,7 @@ Eigen::Matrix4d rotation_matrix(double angle)
 }
 
 
-Eigen::Matrix4d Polariser::get_mueller_matrix()
+Eigen::Matrix4d Polariser::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
 {
     double tx1_sq = pow(tx1,2);
     double tx2_sq = pow(tx2,2);
@@ -54,7 +54,7 @@ Eigen::Matrix4d Polariser::get_mueller_matrix()
 * 
 * @return interferometer delay in radians
 */
-Eigen::Matrix4d IdealWaveplate::get_mueller_matrix()
+Eigen::Matrix4d IdealWaveplate::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
 {
     double delay = get_delay();
     double cdelay = contrast_inst * cos(delay);
