@@ -95,8 +95,8 @@ class IdealWaveplate: public Retarder
  */
 class UniaxialCrystal: public Retarder
 {
-    double cut_angle;
     double thickness;
+    double cut_angle;
     std::string material;
     double ne = 1.2;
     double no = 1.4;

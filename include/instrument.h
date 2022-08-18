@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <cmath>
 #include <Eigen/Dense>
+#include <iostream>
+#include <fstream>
 #include "yaml-cpp/yaml.h"
 #include "../include/camera.h"
 #include "../include/component.h"
@@ -87,7 +89,7 @@ class Instrument
      * 
      * @param x x position on sensor plane in metres
      * @param y y position on sensor plane in metres
-     * @param component pointer to interferometer component
+     * @param component unique pointer to interferometer component
      * @return double 
      */
     double get_inc_angle(double x, double y, std::unique_ptr<Component>& component)
@@ -101,7 +103,7 @@ class Instrument
      * 
      * @param x x position on sensor plane in metres
      * @param y y position on sensor plane in metres
-     * @param component pointer to interferometer component
+     * @param component unique pointer to interferometer component
      * @return double 
      */
     double get_azim_angle(double x, double y, std::unique_ptr<Component>& component)
@@ -121,16 +123,18 @@ class Instrument
     Eigen::Matrix4d get_mueller_matrix(double x, double y, double wavelength)
     {
         Eigen::Matrix4d m_tot;
-        m_tot << 1,   0,   0,   0, 
-                 0,   1,   0,   0,
-                 0,   0,   1,   0,
-                 0,   0,   0,   1;
 
         for (std::size_t i = 0; i < interferometer.size(); i++)
         {  
             double inc_angle = get_inc_angle(x, y, interferometer[i]);
             double azim_angle = get_azim_angle(x, y, interferometer[i]);
-            m_tot *= interferometer[i]->get_mueller_matrix(wavelength, inc_angle, azim_angle); 
+            Eigen::Matrix4d m_component = interferometer[i]->get_mueller_matrix(wavelength, inc_angle, azim_angle);
+            if (i==0){
+                m_tot = m_component;
+            }
+            else {
+                m_tot *= m_component; 
+            }
         }
         return m_tot;
     }
@@ -140,6 +144,7 @@ class Instrument
      * @brief capture interferogram for a uniform scene of monochromatic, unpolarised light
      * 
      * (But remember monochromatic, unpolarised light is impossible!)
+     * Saves image to PPM format for testing.
      * @param wavelength 
      */
     void capture(double wavelength, double flux)
@@ -148,33 +153,30 @@ class Instrument
         std::vector<double> y = camera.get_pixel_positions_y();
         Eigen::Vector4d stokes_in;
         Eigen::Vector4d stokes_out;
-        stokes_in[0] = flux;
+        stokes_in[0] = 500;
         stokes_in[1] = 0;
         stokes_in[2] = 0;
         stokes_in[3] = 0;
+        // stokes_in = stokes_in.transposeInPlace();
 
-        // std::cout << "\n\n";
-        // for (std::size_t i = 0; i < interferometer.size(); i++) {
-        //     std::cout << "interferometer[i]->orientation = " << interferometer[i]->orientation << '\n';
-        // }
-        // std::cout << "\n\n";
+        std::ofstream file;
+        file.open ("out.ppm");
+        file << "P3\n" << camera.sensor_format_x << " " << camera.sensor_format_y << "\n255\n";
 
-        Eigen::Matrix4d m = get_mueller_matrix(0., 0., wavelength);
+        for (std::size_t j = 0; j < y.size(); j++){
+            for (std::size_t i = 0; i < x.size(); i++){
+                stokes_out = get_mueller_matrix(x[i], y[j], wavelength) * stokes_in;
+                int counts = static_cast<int>(stokes_out[0]);
+                file << counts << ' ' << counts << ' ' << counts << '\n';
+            }
+        }
 
-        std::cout << m << '\n';
-
-        // for (std::size_t i = 0; i < x.size(); i++){
-        //     for (std::size_t j = 0; j < y.size(); j++){
-        //         stokes_out = get_mueller_matrix(x[i], y[j], wavelength) * stokes_in;
-        //     }
-        // }
+        file.close();
     }
 
 
     void get_instrument_type(){}
     void get_delay(){}
-    void capture(){}
-
 };
 
 #endif
