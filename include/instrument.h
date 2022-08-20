@@ -75,10 +75,6 @@ class Instrument
                 throw std::logic_error("Interferometer component was not understood.");
             }
         }
-
-        for (std::size_t i = 0; i < interferometer.size(); i++) {
-            std::cout << "interferometer[i]->orientation = " << interferometer[i]->orientation << '\n';
-        }
     }
 
     void write_config(){}
@@ -157,7 +153,6 @@ class Instrument
         stokes_in[1] = 0;
         stokes_in[2] = 0;
         stokes_in[3] = 0;
-        // stokes_in = stokes_in.transposeInPlace();
 
         std::ofstream file;
         file.open ("out.ppm");

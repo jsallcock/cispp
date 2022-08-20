@@ -9,12 +9,12 @@
 
 /**
  * @brief Mueller matrix for frame rotation
- * @param angle angle of rotation in radians, anti-clockwise from x-axis.
+ * @param angle angle of rotation in degrees, anti-clockwise from x-axis.
  * @return rotation matrix
  */
 Eigen::Matrix4d rotation_matrix(double angle)
 {
-    double a2 = 2 * angle;
+    double a2 = 2 * angle * M_PI / 180;
     double s2 = sin(a2);
     double c2 = cos(a2);
     Eigen::Matrix4d m;
@@ -81,9 +81,10 @@ Eigen::Matrix4d IdealWaveplate::get_mueller_matrix(double wavelength, double inc
 */
 double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double azim_angle)
 {
+    double cut_angle_rad = cut_angle * M_PI / 180;
     double s_inc_angle = sin(inc_angle);
-    double s_cut_angle = sin(cut_angle);
-    double c_cut_angle = cos(cut_angle);
+    double s_cut_angle = sin(cut_angle_rad);
+    double c_cut_angle = cos(cut_angle_rad);
     double s_azim_angle = sin(azim_angle);
     double c_azim_angle = cos(azim_angle);
     double s_inc_angle2 = pow(s_inc_angle, 2);
@@ -94,8 +95,26 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
     double p = ne2 * s_cut_angle2 + no2 * c_cut_angle2;
 
     double term_1 = sqrt(no2 - s_inc_angle2);
-    double term_2 = (no2 - ne2) * (sin(cut_angle) * c_cut_angle * c_azim_angle * s_inc_angle) / p;
+    double term_2 = (no2 - ne2) * (s_cut_angle * c_cut_angle * c_azim_angle * s_inc_angle) / p;
     double term_3 = - no * sqrt((ne2 * p) - ((ne2 - (ne2 - no2) * c_cut_angle2 * pow(s_azim_angle,2)) * s_inc_angle2)) / p;
+
+
+    /*
+    s_inc_angle = np.sin(inc_angle)
+    s_inc_angle_2 = s_inc_angle ** 2
+    s_cut_angle_2 = np.sin(cut_angle) ** 2
+    c_cut_angle_2 = np.cos(cut_angle) ** 2
+
+    term_1 = np.sqrt(no ** 2 - s_inc_angle_2)
+    term_2 = (no ** 2 - ne ** 2) * \
+             (np.sin(cut_angle) * np.cos(cut_angle) * np.cos(azim_angle) * s_inc_angle) / \
+             (ne ** 2 * s_cut_angle_2 + no ** 2 * c_cut_angle_2)
+    term_3 = - no * np.sqrt(
+        (ne ** 2 * (ne ** 2 * s_cut_angle_2 + no ** 2 * c_cut_angle_2)) -
+        ((ne ** 2 - (ne ** 2 - no ** 2) * c_cut_angle_2 * np.sin(
+            azim_angle) ** 2) * s_inc_angle_2)) / \
+             (ne ** 2 * s_cut_angle_2 + no ** 2 * c_cut_angle_2)
+    */
 
     return 2 * M_PI * (thickness / wavelength) * (term_1 + term_2 + term_3);
 }

@@ -106,7 +106,10 @@ class UniaxialCrystal: public Retarder
     public:
 
     UniaxialCrystal(double orientation, double thickness, double cut_angle, std::string material)
-    : Retarder(orientation), thickness(thickness), cut_angle(cut_angle), material(material)
+    : Retarder(orientation), 
+      thickness(thickness), 
+      cut_angle(cut_angle), 
+      material(material)
     {}
     
     double get_delay(double wavelength, double inc_angle, double azim_angle);
