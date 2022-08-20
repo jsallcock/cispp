@@ -105,10 +105,18 @@ class UniaxialCrystal: public Retarder
 
     public:
 
+    /**
+     * @brief Construct a new Uniaxial Crystal object
+     * 
+     * @param orientation 
+     * @param thickness 
+     * @param cut_angle 
+     * @param material 
+     */
     UniaxialCrystal(double orientation, double thickness, double cut_angle, std::string material)
     : Retarder(orientation), 
       thickness(thickness), 
-      cut_angle(cut_angle), 
+      cut_angle(cut_angle * M_PI / 180), 
       material(material)
     {}
     

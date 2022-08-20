@@ -3,7 +3,19 @@ CXXFLAGS+=-O2
 CXXFLAGS+=-Wall
 
 
-all: build/test_component build/test_camera build/test_instrument
+all: build/test_material build/test_component build/test_camera build/test_instrument
+
+
+# material
+build/test_material: build/test_material.o build/material.o
+	$(CXX) $(CXXFLAGS) build/test_material.o build/material.o -o build/test_material
+
+build/test_material.o: tests/test_material.cpp include/material.h
+	$(CXX) $(CXXFLAGS) -c tests/test_material.cpp -o build/test_material.o
+
+build/material.o: src/material.cpp include/material.h
+	$(CXX) $(CXXFLAGS) -c src/material.cpp -o build/material.o
+
 
 # component
 build/test_component: build/test_component.o build/component.o

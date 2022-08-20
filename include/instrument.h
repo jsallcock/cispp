@@ -156,6 +156,7 @@ class Instrument
 
         std::ofstream file;
         file.open ("out.ppm");
+        int max_counts = 255;
         file << "P3\n" << camera.sensor_format_x << " " << camera.sensor_format_y << "\n255\n";
 
         for (std::size_t j = 0; j < y.size(); j++){
@@ -165,7 +166,6 @@ class Instrument
                 file << counts << ' ' << counts << ' ' << counts << '\n';
             }
         }
-
         file.close();
     }
 
