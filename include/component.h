@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cmath>
 #include <Eigen/Dense>
+#include "../include/material.h"
 
 
 Eigen::Matrix4d rotation_matrix(double angle);
@@ -97,28 +98,54 @@ class UniaxialCrystal: public Retarder
 {
     double thickness;
     double cut_angle;
-    std::string material;
     double ne = 1.2;
     double no = 1.4;
-    double sellAe;
-    double sellBe;
+    // double sellAe;
+    // double sellBe;
+    MaterialProperties material();
 
     public:
 
     /**
-     * @brief Construct a new Uniaxial Crystal object
+     * @brief Constructor specifying material properties by material name
      * 
      * @param orientation 
      * @param thickness 
      * @param cut_angle 
      * @param material 
      */
-    UniaxialCrystal(double orientation, double thickness, double cut_angle, std::string material)
+    UniaxialCrystal(
+        double orientation, 
+        double thickness, 
+        double cut_angle, 
+        std::string material
+    )
     : Retarder(orientation), 
       thickness(thickness), 
-      cut_angle(cut_angle * M_PI / 180), 
-      material(material)
-    {}
+      cut_angle(cut_angle * M_PI / 180)
+    {
+        // material = MaterialProperties();
+    }
+
+    // /**
+    //  * @brief Constructor specifying material properties manually
+    //  * 
+    //  * @param orientation 
+    //  * @param thickness 
+    //  * @param cut_angle 
+    //  * @param material_properties
+    //  */
+    // UniaxialCrystal(
+    //     double orientation, 
+    //     double thickness, 
+    //     double cut_angle, 
+    //     MaterialProperties material_properties
+    // )
+    // : Retarder(orientation), 
+    //   thickness(thickness), 
+    //   cut_angle(cut_angle * M_PI / 180), 
+    //   material_properties(material_properties)
+    // {}
     
     double get_delay(double wavelength, double inc_angle, double azim_angle);
     Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);

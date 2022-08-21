@@ -1,53 +1,39 @@
+#ifndef MATERIAL_H
+#define MATERIAL_H
+#include <string>
+#include <cmath>
 
 
 
-double get_refractive_index_e()
+struct MaterialProperties
 {
+    std::string name {};
 
-}
+    double sellAe {};
+    double sellBe {};
+    double sellCe {};
+    double sellDe {};
+    double sellEe {};
+    double sellFe {};
 
-double get_refractive_index_o()
-{
+    double sellAo {};
+    double sellBo {};
+    double sellCo {};
+    double sellDo {};
+    double sellEo {};
+    double sellFo {};
+};
 
-}
+MaterialProperties get_material_properties(std::string material_name);
 
-/**
- * @brief 
- * 
- * @param wl_um 
- * @param sellA 
- * @param sellB 
- * @param sellC 
- * @param sellD 
- * @return double 
- */
-double sellmeier_eqn(double wl_um, double A, double B, double C, double D)
-{
-    wl_um2 = pow(wl_um, 2);
-    return sqrt(A + (B / (wl_um2 + C)) + (D * wl_um2));
-}
+void get_refractive_index_e(double wavelength, std::string material);
 
+void get_refractive_index_o(double wavelength, std::string material);
 
-/**
- * @brief 
- * 
- * @param wl_um 
- * @param sellA 
- * @param sellB 
- * @param sellC 
- * @param sellD 
- * @return double 
- */
-double sellmeier_eqn(double wl_um, double A, double B, double C, double D, double E)
-{
-    wl_um2 = pow(wl_um, 2);
-    return sqrt(A + (B / (wl_um2 + C)) + (D / (wl_um2 + E)));
-}
+double sellmeier_eqn(double wl_um, double A, double B, double C, double D);
 
+double sellmeier_eqn(double wl_um, double A, double B, double C, double D, double E);
 
-double sellmeier_eqn(double wl_um, double A, double B, double C, double D, double E, double F)
-{
-    wl_um2 = pow(wl_um, 2);
-    
-}
+double sellmeier_eqn(double wl_um, double A, double B, double C, double D, double E, double F);
 
+#endif

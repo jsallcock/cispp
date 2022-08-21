@@ -54,7 +54,8 @@ class Instrument
         YAML::Node node = config["interferometer"];
 
         // loop over interferometer components
-        for (std::size_t i = 0; i < node.size(); i++) {
+        for (std::size_t i = 0; i < node.size(); i++)
+        {
             if (node[i]["LinearPolariser"]){
                 double orientation = node[i]["LinearPolariser"]["orientation"].as<double>();
                 std::unique_ptr<Component> ptr = std::make_unique<Polariser>(orientation);
@@ -62,13 +63,17 @@ class Instrument
             }
 
             else if (node[i]["UniaxialCrystal"]){
+                double orientation = node[i]["UniaxialCrystal"]["orientation"].as<double>();
                 double thickness = node[i]["UniaxialCrystal"]["thickness"].as<double>();
                 double cut_angle = node[i]["UniaxialCrystal"]["cut_angle"].as<double>();
                 std::string material = node[i]["UniaxialCrystal"]["material"].as<std::string>();
-                double orientation = node[i]["UniaxialCrystal"]["orientation"].as<double>();
-
+                
                 std::unique_ptr<Component> ptr = std::make_unique<UniaxialCrystal>(orientation, thickness, cut_angle, material);
-                interferometer.push_back(std::move(ptr));        
+                interferometer.push_back(std::move(ptr));    
+
+                if (node[i]["UniaxialCrystal"]["sellmeier_coefs"]){
+                    std::cout << "sellmeier coefficients found" << std::endl;
+                }    
             }
             
             else { 

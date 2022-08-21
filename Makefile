@@ -6,9 +6,9 @@ CXXFLAGS+=-Wall
 all: build/test_material build/test_component build/test_camera build/test_instrument
 
 
-# material
+# MATERIAL
 build/test_material: build/test_material.o build/material.o
-	$(CXX) $(CXXFLAGS) build/test_material.o build/material.o -o build/test_material
+	$(CXX) $(CXXFLAGS) build/test_material.o build/material.o -o build/test_material -lyaml-cpp
 
 build/test_material.o: tests/test_material.cpp include/material.h
 	$(CXX) $(CXXFLAGS) -c tests/test_material.cpp -o build/test_material.o
@@ -17,9 +17,9 @@ build/material.o: src/material.cpp include/material.h
 	$(CXX) $(CXXFLAGS) -c src/material.cpp -o build/material.o
 
 
-# component
-build/test_component: build/test_component.o build/component.o
-	$(CXX) $(CXXFLAGS) build/test_component.o build/component.o -o build/test_component
+# COMPONENT
+build/test_component: build/test_component.o build/component.o build/material.o
+	$(CXX) $(CXXFLAGS) build/test_component.o build/component.o build/material.o -o build/test_component -lyaml-cpp
 
 build/test_component.o: tests/test_component.cpp include/component.h
 	$(CXX) $(CXXFLAGS) -c tests/test_component.cpp -o build/test_component.o
@@ -28,7 +28,7 @@ build/component.o: src/component.cpp include/component.h
 	$(CXX) $(CXXFLAGS) -c src/component.cpp -o build/component.o
 
 
-# camera
+# CAMERA
 build/test_camera: build/test_camera.o build/camera.o
 	$(CXX) $(CXXFLAGS) build/test_camera.o build/camera.o -o build/test_camera
 
@@ -39,9 +39,10 @@ build/camera.o: src/camera.cpp include/camera.h
 	$(CXX) $(CXXFLAGS) -c src/camera.cpp -o build/camera.o
 
 
-# instrument
+# INSTRUMENT
 build/test_instrument: build/test_instrument.o build/instrument.o build/component.o build/camera.o
-	$(CXX) $(CXXFLAGS) build/test_instrument.o build/instrument.o build/component.o build/camera.o -o build/test_instrument -lyaml-cpp
+	$(CXX) $(CXXFLAGS) build/test_instrument.o build/instrument.o build/component.o build/camera.o \
+	-o build/test_instrument -lyaml-cpp
 
 build/test_instrument.o: tests/test_instrument.cpp include/instrument.h
 	$(CXX) $(CXXFLAGS) -c tests/test_instrument.cpp -o build/test_instrument.o
