@@ -53,6 +53,19 @@ Eigen::Matrix4d Polariser::get_mueller_matrix(double wavelength, double inc_angl
     return rotmat.transpose() * m * rotmat;
 };
 
+/**
+ * @brief 
+ * 
+ * @param wavelength 
+ * @param inc_angle 
+ * @param azim_angle 
+ * @return double 
+ */
+double Polariser::get_delay(double wavelength, double inc_angle, double azim_angle)
+{
+    return 0;
+}
+
 
 /**
 * @brief Calculate Mueller matrix for light ray
@@ -114,7 +127,7 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
 
 
 /**
- * @brief test that two components have orientations that are either parallel or orthogonal
+ * @brief test that two components have orientations that differ by 90 or 0 degrees
  * 
  * @param c1
  * @param c2 
@@ -132,20 +145,20 @@ bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c
 }
 
 
-// /**
-//  * @brief test that two components have orientations that differ by 45 degrees
-//  * 
-//  * @param c1
-//  * @param c2 
-//  * @return true 
-//  * @return false 
-//  */
-// bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
-// {
-//     if (fmod(c1->orientation - c2->orientation, 45) == 0.){
-//         return true;
-//     }
-//     else {
-//         return false;
-//     }
-// }
+/**
+ * @brief test that two components have orientations that differ by +/- 45 degrees
+ * 
+ * @param c1
+ * @param c2 
+ * @return true 
+ * @return false 
+ */
+bool test_align45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
+{
+    if (abs(fmod(c1->orientation - c2->orientation, 90)) == 45.){
+        return true;
+    }
+    else {
+        return false;
+    }
+}

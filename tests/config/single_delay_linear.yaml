@@ -31,8 +31,8 @@ interferometer:
 
   - UniaxialCrystal:
       orientation: 45.
-      cut_angle: 90.
-      thickness: 100.e-3
+      cut_angle: 45.
+      thickness: 10.e-3
       material: 'a-BBO'
 
   - LinearPolariser:

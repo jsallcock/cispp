@@ -15,10 +15,10 @@
 
 class Instrument
 {
-    std::string type = "Mueller";
 
     public:
    
+    std::string type = "mueller";
     double lens_1_focal_length;
     double lens_2_focal_length;
     double lens_3_focal_length;
@@ -27,8 +27,6 @@ class Instrument
     std::string fp_config;
 
     Instrument(std::string fp_config);
-
-    std::string check_type();
 
     void write_config();
 
@@ -43,6 +41,10 @@ class Instrument
     void get_instrument_type();
 
     void get_delay();
+
+    std::string get_type();
+
+    bool test_type_single_delay_linear();
 };
 
 #endif

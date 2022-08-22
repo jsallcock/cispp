@@ -33,6 +33,8 @@ class Component
     virtual ~Component() = default;
 
     virtual Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) = 0;
+
+    virtual double get_delay(double wavelength, double inc_angle, double azim_angle) = 0;
 };
 
 /**
@@ -60,6 +62,8 @@ class Polariser: public Component
     }
 
     Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
+
+    double get_delay(double wavelength, double inc_angle, double azim_angle) override;
 };
 
 
@@ -92,7 +96,7 @@ class Retarder: public Component
         name = "Retarder";
     }
 
-    virtual double get_delay(double wavelength, double inc_angle, double azim_angle) = 0;
+    // virtual double get_delay(double wavelength, double inc_angle, double azim_angle) = 0;
 
     Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
 };
@@ -164,6 +168,6 @@ class UniaxialCrystal: public Retarder
 
 bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
 
-// bool test_align45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
+bool test_align45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
 
 #endif
