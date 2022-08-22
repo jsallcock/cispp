@@ -111,14 +111,14 @@ std::pair<double, double> get_refractive_indices(double wavelength, MaterialProp
 
 
 /**
- * @brief 
+ * @brief 4-parameter Sellmeier equation
  * 
- * @param wl_um2 
+ * @param wl_um2 wavelength in microns, squared
  * @param A 
  * @param B 
  * @param C 
  * @param D 
- * @return double 
+ * @return double refractive index
  */
 double sellmeier_eqn(double wl_um2, double A, double B, double C, double D)
 {
@@ -127,15 +127,15 @@ double sellmeier_eqn(double wl_um2, double A, double B, double C, double D)
 
 
 /**
- * @brief 
+ * @brief 5-parameter Sellmeier equation
  * 
- * @param wl_um2 
+ * @param wl_um2 wavelength in microns, squared
  * @param A 
  * @param B 
  * @param C 
  * @param D 
  * @param E 
- * @return double 
+ * @return double refractive index
  */
 double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, double E)
 {
@@ -144,16 +144,16 @@ double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, doub
 
 
 /**
- * @brief 
+ * @brief 6-parameter Sellmeier equation
  * 
- * @param wl_um2 
+ * @param wl_um2  wavelength in microns, squared
  * @param A 
  * @param B 
  * @param C 
  * @param D 
  * @param E 
  * @param F 
- * @return double 
+ * @return double refractive index
  */
 double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, double E, double F)
 {

@@ -5,8 +5,6 @@
 #include "../include/component.h"
 #include "../include/material.h"
 
-/* Definitions of interferometer components */
-
 
 /**
  * @brief Mueller matrix for frame rotation
@@ -29,6 +27,14 @@ Eigen::Matrix4d rotation_matrix(double angle)
 }
 
 
+/**
+ * @brief Calculate Mueller matrix for light ray
+ * 
+ * @param wavelength wavelength of light (metres)
+ * @param inc_angle incidence angle of the light (radians)
+ * @param azim_angle azimuthal angle of the light (radians)
+ * @return Eigen::Matrix4d 
+ */
 Eigen::Matrix4d Polariser::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
 {
     double tx1_sq = pow(tx1,2);
@@ -50,14 +56,15 @@ Eigen::Matrix4d Polariser::get_mueller_matrix(double wavelength, double inc_angl
 
 /**
 * @brief Calculate Mueller matrix for light ray
-*
-* TODO this method is ~the same for any retarder, so combine into one
 * 
-* @return interferometer delay in radians
+* @param wavelength wavelength of light (metres)
+* @param inc_angle incidence angle of the light (radians)
+* @param azim_angle azimuthal angle of the light (radians) 
+* @return Matrix4d 
 */
-Eigen::Matrix4d IdealWaveplate::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
+Eigen::Matrix4d Retarder::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
 {
-    double delay = get_delay();
+    double delay = get_delay(wavelength, inc_angle, azim_angle);
     double cdelay = contrast_inst * cos(delay);
     double sdelay = contrast_inst * sin(delay);
 
@@ -84,7 +91,18 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
 {
     std::pair<double, double> neno = get_refractive_indices(wavelength, material);
     double ne = neno.first; 
-    double no = neno.second; 
+    double no = neno.second;
+
+    // if (wavelength == wavelength_last){
+    //     ne = ne_last;
+    //     no = no_last;
+    // }
+    // else {
+    //     std::pair<double, double> neno = get_refractive_indices(wavelength, material);
+    //     ne = neno.first; 
+    //     no = neno.second; 
+    // }
+    
     double s_inc_angle = sin(inc_angle);
     double s_cut_angle = sin(cut_angle);
     double c_cut_angle = cos(cut_angle);
@@ -102,29 +120,4 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
     double term_3 = - no * sqrt((ne2 * p) - ((ne2 - (ne2 - no2) * c_cut_angle2 * pow(s_azim_angle,2)) * s_inc_angle2)) / p;
 
     return 2 * M_PI * (thickness / wavelength) * (term_1 + term_2 + term_3);
-}
-
-
-/**
-* @brief Calculate Mueller matrix for light ray
-* 
-* @param wavelength wavelength of light (metres)
-* @param inc_angle incidence angle of the light (radians)
-* @param azim_angle azimuthal angle of the light (radians) 
-* @return Matrix4d 
-*/
-Eigen::Matrix4d UniaxialCrystal::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
-{
-    double delay = get_delay(wavelength, inc_angle, azim_angle);
-    double cdelay = contrast_inst * cos(delay);
-    double sdelay = contrast_inst * sin(delay);
-
-    Eigen::Matrix4d m;
-    m << 1,       0,       0,       0,
-         0,       1,       0,       0,
-         0,       0,  cdelay,  sdelay,
-         0,       0, -sdelay,  cdelay;
-
-    Eigen::Matrix4d rotmat = rotation_matrix(orientation);
-    return rotmat.transpose() * m * rotmat;
 }

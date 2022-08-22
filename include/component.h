@@ -20,9 +20,9 @@ class Component
     : orientation(orientation)
     {}
 
-    virtual Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) = 0;
-
     virtual ~Component() = default;
+
+    virtual Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) = 0;
 };
 
 /**
@@ -42,7 +42,7 @@ class Polariser: public Component
     : Component(orientation), tx1(tx1), tx2(tx2)
     {}
 
-    Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
+    Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
 };
 
 
@@ -67,11 +67,15 @@ class Retarder: public Component
     Retarder(double orientation, double contrast_inst, double tilt_x, double tilt_y)
     : Component(orientation), contrast_inst(contrast_inst), tilt_x(tilt_x), tilt_y(tilt_y)
     {}
+
+    virtual double get_delay(double wavelength, double inc_angle, double azim_angle) = 0;
+
+    Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
 };
 
 
 /**
- * @brief Idealised waveplate, imparting constant delay regardless of ray wavelength or ray path. 
+ * @brief Ideal waveplate imparts same delay regardless of ray wavelength or ray path. 
  */
 class IdealWaveplate: public Retarder
 {
@@ -83,11 +87,10 @@ class IdealWaveplate: public Retarder
     : Retarder(orientation), delay(delay)
     {}
     
-    double get_delay(){
+    double get_delay(double wavelength, double inc_angle, double azim_angle) override 
+    {
         return delay;
     }
-
-    Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
 };
 
 
@@ -100,8 +103,14 @@ class UniaxialCrystal: public Retarder
     double cut_angle;
     MaterialProperties material{};
 
-    public:
+    // privately store refractive indices calculated for the previous wavelength
+    // avoids unnecessary re-calculation
+    // double wavelength_last;
+    // double ne_last;
+    // double no_last;
+    // actually this gave no performance benefit
 
+    public:
 
     /**
     * @brief Constructor specifying material properties by material name
@@ -123,32 +132,8 @@ class UniaxialCrystal: public Retarder
     cut_angle(cut_angle * M_PI / 180),
     material(get_material_properties(material_name))
     {}
-
-
-    // /**
-    //  * @brief Constructor specifying material properties manually
-    //  * 
-    //  * @param orientation 
-    //  * @param thickness 
-    //  * @param cut_angle 
-    //  * @param material_properties
-    //  */
-    // UniaxialCrystal(
-    //     double orientation, 
-    //     double thickness, 
-    //     double cut_angle, 
-    //     MaterialProperties material_properties
-    // )
-    // : Retarder(orientation), 
-    //   thickness(thickness), 
-    //   cut_angle(cut_angle * M_PI / 180), 
-    //   material_properties(material_properties)
-    // {}
     
-    double get_delay(double wavelength, double inc_angle, double azim_angle);
-    Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
+    double get_delay(double wavelength, double inc_angle, double azim_angle) override;
 };
-
-
 
 #endif
