@@ -10,12 +10,22 @@
 
 Eigen::Matrix4d rotation_matrix(double angle);
 
-
+/**
+ * @brief abstract base class for interferometer component
+ * 
+ */
 class Component
 {
     public:
-    double orientation {0};
 
+    std::string name;
+    double orientation {0};
+    
+    /**
+     * @brief Construct a new Component object
+     * 
+     * @param orientation 
+     */
     Component(double orientation)
     : orientation(orientation)
     {}
@@ -31,16 +41,23 @@ class Component
 class Polariser: public Component
 {
     public:
+
     double tx1 {1};
     double tx2 {0};
 
     Polariser(double orientation)
     : Component(orientation)
-    {}
+    {
+        name = "Polariser";
+    }
 
     Polariser(double orientation, double tx1, double tx2)
-    : Component(orientation), tx1(tx1), tx2(tx2)
-    {}
+    : Component(orientation), 
+      tx1(tx1), 
+      tx2(tx2)
+    {
+        name = "Polariser";
+    }
 
     Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
 };
@@ -52,21 +69,28 @@ class Polariser: public Component
 class Retarder: public Component
 {
     public:
+
     double contrast_inst {1};
     double tilt_x {0};
     double tilt_y {0};
 
     Retarder(double orientation)
     : Component(orientation)
-    {}
+    {
+        name = "Retarder";
+    }
 
     Retarder(double orientation, double contrast_inst)
     : Component(orientation), contrast_inst(contrast_inst)
-    {}
+    {
+        name = "Retarder";
+    }
 
     Retarder(double orientation, double contrast_inst, double tilt_x, double tilt_y)
     : Component(orientation), contrast_inst(contrast_inst), tilt_x(tilt_x), tilt_y(tilt_y)
-    {}
+    {
+        name = "Retarder";
+    }
 
     virtual double get_delay(double wavelength, double inc_angle, double azim_angle) = 0;
 
@@ -79,12 +103,13 @@ class Retarder: public Component
  */
 class IdealWaveplate: public Retarder
 {
-    double delay;
-
     public:
 
+    double delay;
+
     IdealWaveplate(double orientation, double delay)
-    : Retarder(orientation), delay(delay)
+    : Retarder(orientation), 
+      delay(delay)
     {}
     
     double get_delay(double wavelength, double inc_angle, double azim_angle) override 
@@ -99,10 +124,6 @@ class IdealWaveplate: public Retarder
  */
 class UniaxialCrystal: public Retarder
 {
-    double thickness;
-    double cut_angle;
-    MaterialProperties material{};
-
     // privately store refractive indices calculated for the previous wavelength
     // avoids unnecessary re-calculation
     // double wavelength_last;
@@ -111,6 +132,10 @@ class UniaxialCrystal: public Retarder
     // actually this gave no performance benefit
 
     public:
+
+    double thickness;
+    double cut_angle;
+    MaterialProperties material{};
 
     /**
     * @brief Constructor specifying material properties by material name
@@ -124,7 +149,7 @@ class UniaxialCrystal: public Retarder
     (
         double orientation, 
         double thickness, 
-        double cut_angle, 
+        double cut_angle,
         std::string material_name
     )
     : Retarder(orientation), 
@@ -135,5 +160,10 @@ class UniaxialCrystal: public Retarder
     
     double get_delay(double wavelength, double inc_angle, double azim_angle) override;
 };
+
+
+bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
+
+// bool test_align45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
 
 #endif

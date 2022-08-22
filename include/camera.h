@@ -1,5 +1,6 @@
 #ifndef CAMERA_H
 #define CAMERA_H
+#include <string>
 #include <vector>
 
 class Camera
@@ -13,6 +14,7 @@ class Camera
     double quantum_efficiency;
     double epercount;
     double cam_noise;
+    std::string type {"monochrome"};
 
     /**
      * @brief Construct a new Camera object
@@ -42,6 +44,39 @@ class Camera
       quantum_efficiency(quantum_efficiency),
       epercount(epercount),
       cam_noise(cam_noise)
+    {}
+
+    /**
+     * @brief Construct a new Camera object
+     * 
+     * @param sensor_format_x 
+     * @param sensor_format_y 
+     * @param pixel_size 
+     * @param bit_depth 
+     * @param quantum_efficiency 
+     * @param epercount 
+     * @param cam_noise 
+     * @param type 
+     */
+    Camera
+    (
+        int sensor_format_x,
+        int sensor_format_y,
+        double pixel_size,
+        int bit_depth,
+        double quantum_efficiency,
+        double epercount,
+        double cam_noise,
+        std::string type
+    )
+    : sensor_format_x(sensor_format_x),
+      sensor_format_y(sensor_format_y), 
+      pixel_size(pixel_size),
+      bit_depth(bit_depth),
+      quantum_efficiency(quantum_efficiency),
+      epercount(epercount),
+      cam_noise(cam_noise),
+      type(type)
     {}
 
     /**

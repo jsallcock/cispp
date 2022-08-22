@@ -93,16 +93,6 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
     double ne = neno.first; 
     double no = neno.second;
 
-    // if (wavelength == wavelength_last){
-    //     ne = ne_last;
-    //     no = no_last;
-    // }
-    // else {
-    //     std::pair<double, double> neno = get_refractive_indices(wavelength, material);
-    //     ne = neno.first; 
-    //     no = neno.second; 
-    // }
-    
     double s_inc_angle = sin(inc_angle);
     double s_cut_angle = sin(cut_angle);
     double c_cut_angle = cos(cut_angle);
@@ -121,3 +111,41 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
 
     return 2 * M_PI * (thickness / wavelength) * (term_1 + term_2 + term_3);
 }
+
+
+/**
+ * @brief test that two components have orientations that are either parallel or orthogonal
+ * 
+ * @param c1
+ * @param c2 
+ * @return true 
+ * @return false 
+ */
+bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
+{
+    if (fmod(c1->orientation - c2->orientation, 90) == 0.){
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+
+// /**
+//  * @brief test that two components have orientations that differ by 45 degrees
+//  * 
+//  * @param c1
+//  * @param c2 
+//  * @return true 
+//  * @return false 
+//  */
+// bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
+// {
+//     if (fmod(c1->orientation - c2->orientation, 45) == 0.){
+//         return true;
+//     }
+//     else {
+//         return false;
+//     }
+// }

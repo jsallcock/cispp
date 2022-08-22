@@ -28,6 +28,8 @@ class Instrument
 
     Instrument(std::string fp_config);
 
+    std::string check_type();
+
     void write_config();
 
     double get_inc_angle(double x, double y, std::unique_ptr<Component>& component);

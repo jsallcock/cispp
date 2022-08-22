@@ -11,43 +11,44 @@
 Instrument::Instrument(std::string fp_config)
 : fp_config(fp_config)
 {
-    YAML::Node config = YAML::LoadFile(fp_config);
+    YAML::Node nd_config = YAML::LoadFile(fp_config);
+    YAML::Node nd_cam = nd_config["camera"];
+    YAML::Node nd_int = nd_config["interferometer"];
 
-    lens_1_focal_length = config["lens_1_focal_length"].as<double>();
-    lens_2_focal_length = config["lens_2_focal_length"].as<double>();
-    lens_3_focal_length = config["lens_3_focal_length"].as<double>();
+    lens_1_focal_length = nd_config["lens_1_focal_length"].as<double>();
+    lens_2_focal_length = nd_config["lens_2_focal_length"].as<double>();
+    lens_3_focal_length = nd_config["lens_3_focal_length"].as<double>();
 
     camera = Camera(
-        config["camera"]["sensor_format"][0].as<int>(),  // sensor_format_x
-        config["camera"]["sensor_format"][1].as<int>(),  // sensor_format_y
-        config["camera"]["pixel_size"].as<double>(),
-        config["camera"]["bit_depth"].as<int>(),
-        config["camera"]["qe"].as<double>(),
-        config["camera"]["epercount"].as<double>(),
-        config["camera"]["cam_noise"].as<double>()
+        nd_cam["sensor_format"][0].as<int>(),  // sensor_format_x
+        nd_cam["sensor_format"][1].as<int>(),  // sensor_format_y
+        nd_cam["pixel_size"].as<double>(),
+        nd_cam["bit_depth"].as<int>(),
+        nd_cam["qe"].as<double>(),
+        nd_cam["epercount"].as<double>(),
+        nd_cam["cam_noise"].as<double>(),
+        nd_cam["type"].as<std::string>()
     );
 
-    YAML::Node node = config["interferometer"];
-
     // loop over interferometer components
-    for (std::size_t i = 0; i < node.size(); i++)
+    for (std::size_t i = 0; i < nd_int.size(); i++)
     {
-        if (node[i]["LinearPolariser"]){
-            double orientation = node[i]["LinearPolariser"]["orientation"].as<double>();
+        if (nd_int[i]["LinearPolariser"]){
+            double orientation = nd_int[i]["LinearPolariser"]["orientation"].as<double>();
             std::unique_ptr<Component> ptr = std::make_unique<Polariser>(orientation);
             interferometer.push_back(std::move(ptr));
         }
 
-        else if (node[i]["UniaxialCrystal"]){
-            double orientation = node[i]["UniaxialCrystal"]["orientation"].as<double>();
-            double thickness = node[i]["UniaxialCrystal"]["thickness"].as<double>();
-            double cut_angle = node[i]["UniaxialCrystal"]["cut_angle"].as<double>();
-            std::string material = node[i]["UniaxialCrystal"]["material"].as<std::string>();
+        else if (nd_int[i]["UniaxialCrystal"]){
+            double orientation = nd_int[i]["UniaxialCrystal"]["orientation"].as<double>();
+            double thickness = nd_int[i]["UniaxialCrystal"]["thickness"].as<double>();
+            double cut_angle = nd_int[i]["UniaxialCrystal"]["cut_angle"].as<double>();
+            std::string material = nd_int[i]["UniaxialCrystal"]["material"].as<std::string>();
             
             std::unique_ptr<Component> ptr = std::make_unique<UniaxialCrystal>(orientation, thickness, cut_angle, material);
             interferometer.push_back(std::move(ptr));    
 
-            if (node[i]["UniaxialCrystal"]["sellmeier_coefs"]){
+            if (nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"]){
                 std::cout << "sellmeier coefficients found" << std::endl;
             }    
         }
@@ -56,7 +57,40 @@ Instrument::Instrument(std::string fp_config)
             throw std::logic_error("Interferometer component was not understood.");
         }
     }
+
+    // type = check_type();
 }
+
+
+
+/**
+ * @brief 
+ * 
+ * @return std::string 
+ */
+ std::string Instrument::check_type()
+ {
+    // size_t ilast = interferometer.size() - 1;
+    // if (camera.type == "monochrome")
+    // {
+    //     if (interferometer[0]->name == "Polariser" && 
+    //         interferometer[ilast]->name == "Polariser")
+    //         {
+
+    //         size_t rcount = 0;
+    //         for (int i=1; i<ilast; i++)
+    //         {
+    //             if (interferometer[i]->name == "Retarder" && interferometer[i])
+    //             {
+
+    //             }
+    //         }
+    //         if rc
+            
+    // }
+
+    return "mueller";
+ }
 
 
 
@@ -99,17 +133,16 @@ double Instrument::get_azim_angle(double x, double y, std::unique_ptr<Component>
 Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavelength)
 {
     Eigen::Matrix4d mtot;
-
     for (std::size_t i = 0; i < interferometer.size(); i++)
     {  
         double inc_angle = get_inc_angle(x, y, interferometer[i]);
         double azim_angle = get_azim_angle(x, y, interferometer[i]);
-        Eigen::Matrix4d m_component = interferometer[i]->get_mueller_matrix(wavelength, inc_angle, azim_angle);
+        Eigen::Matrix4d m = interferometer[i]->get_mueller_matrix(wavelength, inc_angle, azim_angle);
         if (i==0){
-            mtot = m_component;
+            mtot = m;
         }
         else {
-            mtot *= m_component; 
+            mtot *= m; 
         }
     }
     return mtot;
@@ -117,7 +150,7 @@ Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavele
 
 
 /**
-* @brief capture interferogram for a uniform scene of monochromatic, unpolarised light
+* @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light
 * 
 * (But remember monochromatic, unpolarised light is impossible!)
 * Saves image to PPM format for testing.
