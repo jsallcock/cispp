@@ -3,6 +3,7 @@
 #include <cmath>
 #include <Eigen/Dense>
 #include "../include/component.h"
+#include "../include/material.h"
 
 /* Definitions of interferometer components */
 
@@ -81,6 +82,9 @@ Eigen::Matrix4d IdealWaveplate::get_mueller_matrix(double wavelength, double inc
 */
 double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double azim_angle)
 {
+    std::pair<double, double> neno = get_refractive_indices(wavelength, material);
+    double ne = neno.first; 
+    double no = neno.second; 
     double s_inc_angle = sin(inc_angle);
     double s_cut_angle = sin(cut_angle);
     double c_cut_angle = cos(cut_angle);

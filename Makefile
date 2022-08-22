@@ -40,8 +40,8 @@ build/camera.o: src/camera.cpp include/camera.h
 
 
 # INSTRUMENT
-build/test_instrument: build/test_instrument.o build/instrument.o build/component.o build/camera.o
-	$(CXX) $(CXXFLAGS) build/test_instrument.o build/instrument.o build/component.o build/camera.o \
+build/test_instrument: build/test_instrument.o build/instrument.o build/component.o build/camera.o build/material.o
+	$(CXX) $(CXXFLAGS) build/test_instrument.o build/instrument.o build/component.o build/camera.o build/material.o \
 	-o build/test_instrument -lyaml-cpp
 
 build/test_instrument.o: tests/test_instrument.cpp include/instrument.h

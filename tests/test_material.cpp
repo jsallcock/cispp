@@ -4,15 +4,9 @@
 
 int main()
 {
-    MaterialProperties material_properties_empty;
-    std::cout << material_properties_empty.name << std::endl;
-    std::cout << material_properties_empty.sellAe << std::endl;
-    std::cout << material_properties_empty.sellBe << std::endl;
-    std::cout << material_properties_empty.sellCe << std::endl;
-
-    MaterialProperties material_properties = get_material_properties("a-BBO");
-    std::cout << material_properties.name << std::endl;
-    std::cout << material_properties.sellAe << std::endl;
-    std::cout << material_properties.sellBe << std::endl;
-    std::cout << material_properties.sellCe << std::endl;
+    double wavelength = 465e-9;
+    std::string material_name("a-BBO"); 
+    MaterialProperties mp = get_material_properties(material_name);
+    std::pair<double,double> nn = get_refractive_indices(wavelength, mp);
+    std::cout << nn.first << ' ' << nn.second << std::endl;
 }

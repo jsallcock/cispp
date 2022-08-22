@@ -7,76 +7,121 @@
 
 
 /**
- * @brief get material properties by string
+ * @brief get default material properties by material name
  * 
  * @return MaterialProperties 
  */
 MaterialProperties get_material_properties(std::string material_name)
 {
-    MaterialProperties matprop = {};
-    matprop.name = material_name;
+    MaterialProperties mp = {};
+    mp.name = material_name;
     // YAML::Node data = YAML::LoadFile("../data/material.yaml");
     YAML::Node data = YAML::LoadFile("/Users/jsallcock/fusion/ci/cispp/data/material.yaml");
-
-    bool success = true;
 
     if (!data[material_name]["sellmeier_coefficients"]){
         throw std::logic_error("invalid material_name");
     }
-  
-    try{
-        matprop.sellAe = data[material_name]["sellmeier_coefficients"][0]["Ae"].as<double>();
-    }
-    catch(YAML::TypedBadConversion<double>){
-        throw std::logic_error("invalid material_name");
-    }
 
-
-                matprop.sellBe = data[material_name]["sellmeier_coefficients"][0]["Be"].as<double>();
-                matprop.sellCe = data[material_name]["sellmeier_coefficients"][0]["Ce"].as<double>();
-                matprop.sellDe = data[material_name]["sellmeier_coefficients"][0]["De"].as<double>();
-                matprop.sellEe = data[material_name]["sellmeier_coefficients"][0]["Ee"].as<double>();
-                matprop.sellFe = data[material_name]["sellmeier_coefficients"][0]["Fe"].as<double>();
-                matprop.sellAo = data[material_name]["sellmeier_coefficients"][0]["Ao"].as<double>();
-                matprop.sellBo = data[material_name]["sellmeier_coefficients"][0]["Bo"].as<double>();
-                matprop.sellCo = data[material_name]["sellmeier_coefficients"][0]["Co"].as<double>();
-                matprop.sellDo = data[material_name]["sellmeier_coefficients"][0]["Do"].as<double>();
-                matprop.sellEo = data[material_name]["sellmeier_coefficients"][0]["Eo"].as<double>();
-                break;
-            }
-        else 
-        {   
-            success = false;
-            break;
-        } 
-    }
-    if (success == false){
-        throw std::logic_error("invalid material_name");
-    }
-   
-    return matprop;
+    std::string alphabet = "ABCDEF";
+    for (int i=0; i<alphabet.size(); i++)
+    {
+        std::string key(1, alphabet[i]);
+        if (data[material_name]["sellmeier_coefficients"][0][key + "e"])
+        {
+            mp.sellmeier_e.push_back(data[material_name]["sellmeier_coefficients"][0][key + "e"].as<double>());
+            mp.sellmeier_o.push_back(data[material_name]["sellmeier_coefficients"][0][key + "o"].as<double>());
+        }
+    }   
+    return mp;
 }
 
 
-void get_refractive_index_e(double wavelength, std::string material)
-{}
+std::pair<double, double> get_refractive_indices(double wavelength, MaterialProperties &mp)
+{
+    size_t nc_e = mp.sellmeier_e.size();
+    size_t nc_o = mp.sellmeier_o.size();
+    assert (nc_e == nc_o);
+    double wl_um2 = pow(wavelength * 1e6, 2); 
+    double ne, no;
+    
+    switch(nc_e)
+    {
+        case 4:
+            ne = sellmeier_eqn(
+                wl_um2, 
+                mp.sellmeier_e[0], 
+                mp.sellmeier_e[1], 
+                mp.sellmeier_e[2], 
+                mp.sellmeier_e[3]
+            );
+            no = sellmeier_eqn(
+                wl_um2, 
+                mp.sellmeier_o[0], 
+                mp.sellmeier_o[1], 
+                mp.sellmeier_o[2], 
+                mp.sellmeier_o[3]
+            );
+            break;
+        
+        case 5:
+            ne = sellmeier_eqn(
+                wl_um2, 
+                mp.sellmeier_e[0], 
+                mp.sellmeier_e[1], 
+                mp.sellmeier_e[2], 
+                mp.sellmeier_e[3],
+                mp.sellmeier_e[4]
+            );
+            no = sellmeier_eqn(
+                wl_um2, 
+                mp.sellmeier_o[0], 
+                mp.sellmeier_o[1], 
+                mp.sellmeier_o[2], 
+                mp.sellmeier_o[3],
+                mp.sellmeier_o[4]
+            );
+            break;
+        
+        case 6:
+            ne = sellmeier_eqn(
+                wl_um2, 
+                mp.sellmeier_e[0], 
+                mp.sellmeier_e[1], 
+                mp.sellmeier_e[2], 
+                mp.sellmeier_e[3],
+                mp.sellmeier_e[4],
+                mp.sellmeier_e[5]
+            );
+            no = sellmeier_eqn(
+                wl_um2, 
+                mp.sellmeier_o[0], 
+                mp.sellmeier_o[1], 
+                mp.sellmeier_o[2], 
+                mp.sellmeier_o[3],
+                mp.sellmeier_o[4],
+                mp.sellmeier_o[5]
+            );
+            break;
 
-void get_refractive_index_o(double wavelength, std::string material)
-{}
+        default:
+            throw std::logic_error("input not understood");
+    }
+    return std::pair<double, double>(ne, no);
+}
+
 
 /**
  * @brief 
  * 
- * @param wl_um 
- * @param sellA 
- * @param sellB 
- * @param sellC 
- * @param sellD 
+ * @param wl_um2 
+ * @param A 
+ * @param B 
+ * @param C 
+ * @param D 
  * @return double 
  */
-double sellmeier_eqn(double wl_um, double A, double B, double C, double D)
+double sellmeier_eqn(double wl_um2, double A, double B, double C, double D)
 {
-    double wl_um2 = pow(wl_um, 2);
     return sqrt(A + (B / (wl_um2 + C)) + (D * wl_um2));
 }
 
@@ -84,16 +129,16 @@ double sellmeier_eqn(double wl_um, double A, double B, double C, double D)
 /**
  * @brief 
  * 
- * @param wl_um 
- * @param sellA 
- * @param sellB 
- * @param sellC 
- * @param sellD 
+ * @param wl_um2 
+ * @param A 
+ * @param B 
+ * @param C 
+ * @param D 
+ * @param E 
  * @return double 
  */
-double sellmeier_eqn(double wl_um, double A, double B, double C, double D, double E)
+double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, double E)
 {
-    double wl_um2 = pow(wl_um, 2);
     return sqrt(A + (B / (wl_um2 + C)) + (D / (wl_um2 + E)));
 }
 
@@ -101,7 +146,7 @@ double sellmeier_eqn(double wl_um, double A, double B, double C, double D, doubl
 /**
  * @brief 
  * 
- * @param wl_um 
+ * @param wl_um2 
  * @param A 
  * @param B 
  * @param C 
@@ -110,9 +155,8 @@ double sellmeier_eqn(double wl_um, double A, double B, double C, double D, doubl
  * @param F 
  * @return double 
  */
-double sellmeier_eqn(double wl_um, double A, double B, double C, double D, double E, double F)
+double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, double E, double F)
 {
-    double wl_um2 = pow(wl_um, 2);
     return sqrt((A * wl_um2 / (wl_um2 - B)) + (C * wl_um2 / (wl_um2 - D)) + (E * wl_um2 / (wl_um2 - F)) + 1);
 }
 

@@ -98,34 +98,32 @@ class UniaxialCrystal: public Retarder
 {
     double thickness;
     double cut_angle;
-    double ne = 1.2;
-    double no = 1.4;
-    // double sellAe;
-    // double sellBe;
-    MaterialProperties material();
+    MaterialProperties material{};
 
     public:
 
+
     /**
-     * @brief Constructor specifying material properties by material name
-     * 
-     * @param orientation 
-     * @param thickness 
-     * @param cut_angle 
-     * @param material 
-     */
-    UniaxialCrystal(
+    * @brief Constructor specifying material properties by material name
+    * 
+    * @param orientation 
+    * @param thickness 
+    * @param cut_angle 
+    * @param material_name 
+    */
+    UniaxialCrystal
+    (
         double orientation, 
         double thickness, 
         double cut_angle, 
-        std::string material
+        std::string material_name
     )
     : Retarder(orientation), 
-      thickness(thickness), 
-      cut_angle(cut_angle * M_PI / 180)
-    {
-        // material = MaterialProperties();
-    }
+    thickness(thickness), 
+    cut_angle(cut_angle * M_PI / 180),
+    material(get_material_properties(material_name))
+    {}
+
 
     // /**
     //  * @brief Constructor specifying material properties manually
