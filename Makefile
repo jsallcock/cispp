@@ -29,8 +29,9 @@ build/component.o: src/component.cpp include/component.h
 
 
 # CAMERA
-build/test_camera: build/test_camera.o build/camera.o
-	$(CXX) $(CXXFLAGS) build/test_camera.o build/camera.o -o build/test_camera
+build/test_camera: build/test_camera.o build/camera.o build/component.o build/material.o
+	$(CXX) $(CXXFLAGS) build/test_camera.o build/camera.o build/component.o build/material.o \
+	-o build/test_camera -lyaml-cpp
 
 build/test_camera.o: tests/test_camera.cpp include/camera.h
 	$(CXX) $(CXXFLAGS) -c tests/test_camera.cpp -o build/test_camera.o

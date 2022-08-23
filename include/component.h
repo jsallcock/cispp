@@ -8,7 +8,7 @@
 #include "../include/material.h"
 
 
-Eigen::Matrix4d rotation_matrix(double angle);
+Eigen::Matrix4d get_rotation_matrix(double angle);
 
 /**
  * @brief abstract base class for interferometer component
@@ -37,8 +37,9 @@ class Component
     virtual double get_delay(double wavelength, double inc_angle, double azim_angle) = 0;
 };
 
+
 /**
- * @brief Linear polariser
+ * @brief Linear (partial) polariser
  */
 class Polariser: public Component
 {
@@ -62,6 +63,8 @@ class Polariser: public Component
     }
 
     Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
+
+    Eigen::Matrix4d get_mueller_matrix();
 
     double get_delay(double wavelength, double inc_angle, double azim_angle) override;
 };

@@ -45,6 +45,8 @@ class Instrument
     std::string get_type();
 
     bool test_type_single_delay_linear();
+
+    bool test_type_single_delay_pixelated();
 };
 
 #endif

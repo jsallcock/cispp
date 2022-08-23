@@ -113,6 +113,10 @@ Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavele
             mtot *= m; 
         }
     }
+    if (camera.type == "monochrome_polarised")
+    {
+        // mtot *=;
+    }
     return mtot;
 }
 
@@ -126,8 +130,8 @@ Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavele
 */
 void Instrument::capture(double wavelength, double flux)
 {
-    std::vector<double> x = camera.get_pixel_positions_x();
-    std::vector<double> y = camera.get_pixel_positions_y();
+    std::vector<double> x = camera.get_pixel_centres_x();
+    std::vector<double> y = camera.get_pixel_centres_y();
     std::ofstream file;
     file.open ("out.ppm");
     // int max_counts = 255;
@@ -137,6 +141,21 @@ void Instrument::capture(double wavelength, double flux)
     if (type == "single_delay_linear")
     {
         std::cout << "capture: single_delay_linear" << std::endl;
+        for (std::size_t j = 0; j < y.size(); j++){
+            for (std::size_t i = 0; i < x.size(); i++){
+                double inc_angle = get_inc_angle(x[i], y[j], interferometer[1]);
+                double azim_angle = get_azim_angle(x[i], y[j], interferometer[1]);
+                double delay = interferometer[1]->get_delay(wavelength, inc_angle, azim_angle);
+                int counts = static_cast<int>((flux / 4) * (1 + cos(delay)));
+                file << counts << ' ' << counts << ' ' << counts << '\n';
+            }
+        }
+        file.close();
+    }
+
+    else if (type == "single_delay_pixelated")
+    {
+        std::cout << "capture: single_delay_pixelated" << std::endl;
         for (std::size_t j = 0; j < y.size(); j++){
             for (std::size_t i = 0; i < x.size(); i++){
                 double inc_angle = get_inc_angle(x[i], y[j], interferometer[1]);
@@ -186,7 +205,12 @@ void Instrument::capture(double wavelength, double flux)
     if (test_type_single_delay_linear()){
         return "single_delay_linear";
     }
-    return "mueller";
+
+    else if (test_type_single_delay_pixelated()){
+        return "single_delay_pixelated";
+    }
+
+    else return "mueller";
  }
 
 
@@ -217,5 +241,18 @@ bool Instrument::test_type_single_delay_linear()
             return true;
         }
     }
+    return false;
+}
+
+
+bool Instrument::test_type_single_delay_pixelated()
+{
+    // if (interferometer.size() > 2 &&
+    //     camera.type == "monochrome_pixelated" &&
+    //     interferometer[0]->name == "Polariser" && 
+    //     interferometer[ilast]->name == "Polariser" &&
+    //     test_align90(interferometer[0], interferometer[ilast]))
+    // {
+    // }
     return false;
 }

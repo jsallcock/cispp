@@ -11,7 +11,7 @@
  * @param angle angle of rotation in degrees, anti-clockwise from x-axis.
  * @return rotation matrix
  */
-Eigen::Matrix4d rotation_matrix(double angle)
+Eigen::Matrix4d get_rotation_matrix(double angle)
 {
     double a2 = 2 * angle * M_PI / 180;
     double s2 = sin(a2);
@@ -37,6 +37,12 @@ Eigen::Matrix4d rotation_matrix(double angle)
  */
 Eigen::Matrix4d Polariser::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
 {
+    return get_mueller_matrix();
+};
+
+
+Eigen::Matrix4d Polariser::get_mueller_matrix()
+{
     double tx1_sq = pow(tx1,2);
     double tx2_sq = pow(tx2,2);
     double sum = (tx1_sq + tx2_sq) / 2;
@@ -49,9 +55,9 @@ Eigen::Matrix4d Polariser::get_mueller_matrix(double wavelength, double inc_angl
             0,    0, prod,    0,
             0,    0,    0, prod;
 
-    Eigen::Matrix4d rotmat = rotation_matrix(orientation);
-    return rotmat.transpose() * m * rotmat;
-};
+    Eigen::Matrix4d rot = get_rotation_matrix(orientation);
+    return rot.transpose() * m * rot;
+}
 
 /**
  * @brief 
@@ -87,8 +93,8 @@ Eigen::Matrix4d Retarder::get_mueller_matrix(double wavelength, double inc_angle
          0,       0,  cdelay,  sdelay,
          0,       0, -sdelay,  cdelay;
 
-    Eigen::Matrix4d rotmat = rotation_matrix(orientation);
-    return rotmat.transpose() * m * rotmat;
+    Eigen::Matrix4d rot = get_rotation_matrix(orientation);
+    return rot.transpose() * m * rot;
 }
 
 
@@ -136,7 +142,7 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
  */
 bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
 {
-    if (fmod(c1->orientation - c2->orientation, 90) == 0.){
+    if (abs(fmod(c1->orientation - c2->orientation, 90)) == 0.){
         return true;
     }
     else {

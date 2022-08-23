@@ -11,12 +11,21 @@ int main()
     double quantum_efficiency = 0.35;
     double epercount = 0.46;
     double cam_noise = 2.5;
-    Camera cam(sensor_format_x, sensor_format_y, pixel_size, bit_depth, quantum_efficiency, epercount, cam_noise);
+    Camera camera(sensor_format_x, sensor_format_y, pixel_size, bit_depth, quantum_efficiency, epercount, cam_noise);
 
-    std::vector<double> ppx = cam.get_pixel_positions_x();
-    for (size_t i = 0; i < ppx.size(); i++)
+    // for (size_t i = 0; i < camera.sensor_format_x; i++)
+    // {
+    //     std::cout << i << std::endl;
+    //     std::cout << camera.pixel_centres_x[i] << std::endl;
+    //     std::cout << camera.get_pixel_idx_x(camera.pixel_centres_x[i]) << std::endl;
+    //     std::cout << std::endl;
+    // }   
+
+    for (size_t i = 0; i < camera.sensor_format_y; i++)
     {
-        std::cout << ppx[i] << std::endl;
-    }
-    
+        std::cout << i << std::endl;
+        std::cout << camera.pixel_centres_y[i] << std::endl;
+        std::cout << camera.get_pixel_idx_y(camera.pixel_centres_y[i]) << std::endl;
+        std::cout << std::endl;
+    }   
 }
