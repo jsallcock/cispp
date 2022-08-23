@@ -136,9 +136,9 @@ class Camera
 
     size_t get_pixel_idx_y(double y);
 
-    double get_pixelated_phase_mask(size_t ix, size_t iy);
+    double get_pixelated_phase_mask(double x, double y);
 
-    Eigen::Matrix4d get_mueller_matrix(size_t ix, size_t iy);
+    Eigen::Matrix4d get_mueller_matrix(double x, double y);
 };
 
 #endif

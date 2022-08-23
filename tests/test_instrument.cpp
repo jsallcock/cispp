@@ -10,8 +10,10 @@
 
 int main ()
 {
-    std::string fp_config = "/Users/jsallcock/fusion/ci/cispp/tests/config/single_delay_linear.yaml";
+    // std::string fp_config = "/Users/jsallcock/fusion/ci/cispp/tests/config/single_delay_linear.yaml";
+    std::string fp_config = "/Users/jsallcock/fusion/ci/cispp/tests/config/single_delay_pixelated.yaml";
     Instrument inst(fp_config);
+    std::cout << "inst.type = " << inst.type << std::endl;
     // inst.type = "mueller";
 
     auto start = std::chrono::high_resolution_clock::now();

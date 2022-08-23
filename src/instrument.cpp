@@ -35,7 +35,8 @@ Instrument::Instrument(std::string fp_config)
     {
         if (nd_int[i]["LinearPolariser"]){
             double orientation = nd_int[i]["LinearPolariser"]["orientation"].as<double>();
-            std::unique_ptr<Component> ptr = std::make_unique<Polariser>(orientation);
+            // std::unique_ptr<Component> ptr = std::make_unique<Polariser>(orientation);
+            auto ptr = std::make_unique<Polariser>(orientation);
             interferometer.push_back(std::move(ptr));
         }
 
@@ -45,12 +46,20 @@ Instrument::Instrument(std::string fp_config)
             double cut_angle = nd_int[i]["UniaxialCrystal"]["cut_angle"].as<double>();
             std::string material = nd_int[i]["UniaxialCrystal"]["material"].as<std::string>();
             
-            std::unique_ptr<Component> ptr = std::make_unique<UniaxialCrystal>(orientation, thickness, cut_angle, material);
+            // std::unique_ptr<Component> ptr = std::make_unique<UniaxialCrystal>(orientation, thickness, cut_angle, material);
+            auto ptr = std::make_unique<UniaxialCrystal>(orientation, thickness, cut_angle, material);
             interferometer.push_back(std::move(ptr));    
 
             if (nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"]){
                 std::cout << "sellmeier coefficients found" << std::endl;
             }    
+        }
+
+        else if (nd_int[i]["QuarterWaveplate"]){
+            double orientation = nd_int[i]["QuarterWaveplate"]["orientation"].as<double>();
+            // std::unique_ptr<Component> ptr = std::make_unique<UniaxialCrystal>(orientation, thickness, cut_angle, material);
+            auto ptr = std::make_unique<IdealWaveplate>(orientation, M_PI / 2);
+            interferometer.push_back(std::move(ptr));
         }
         
         else { 
@@ -113,9 +122,8 @@ Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavele
             mtot *= m; 
         }
     }
-    if (camera.type == "monochrome_polarised")
-    {
-        // mtot *=;
+    if (camera.type == "monochrome_polarised"){
+        mtot *= camera.get_mueller_matrix(x, y);
     }
     return mtot;
 }
