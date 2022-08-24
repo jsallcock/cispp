@@ -155,6 +155,7 @@ void Instrument::capture(double wavelength, double flux)
                 double azim_angle = get_azim_angle(x[i], y[j], interferometer[1]);
                 double delay = interferometer[1]->get_delay(wavelength, inc_angle, azim_angle);
                 int counts = static_cast<int>((flux / 4) * (1 + cos(delay)));
+
                 file << counts << ' ' << counts << ' ' << counts << '\n';
             }
         }
@@ -169,7 +170,9 @@ void Instrument::capture(double wavelength, double flux)
                 double inc_angle = get_inc_angle(x[i], y[j], interferometer[1]);
                 double azim_angle = get_azim_angle(x[i], y[j], interferometer[1]);
                 double delay = interferometer[1]->get_delay(wavelength, inc_angle, azim_angle);
-                int counts = static_cast<int>((flux / 4) * (1 + cos(delay)));
+                double mask = camera.get_pixelated_phase_mask(x[i], y[j]);
+                int counts = static_cast<int>((flux / 4) * (1 + cos(delay + mask)));
+
                 file << counts << ' ' << counts << ' ' << counts << '\n';
             }
         }
@@ -191,6 +194,7 @@ void Instrument::capture(double wavelength, double flux)
             for (std::size_t i = 0; i < x.size(); i++){
                 stokes_out = get_mueller_matrix(x[i], y[j], wavelength) * stokes_in;
                 int counts = static_cast<int>(stokes_out[0]);
+
                 file << counts << ' ' << counts << ' ' << counts << '\n';
             }
         }
@@ -223,7 +227,7 @@ void Instrument::capture(double wavelength, double flux)
 
 
 /**
- * @brief 
+ * @brief test if instrument configuration matches "single_delay_linear" type
  * 
  * @return true 
  * @return false 
@@ -253,14 +257,25 @@ bool Instrument::test_type_single_delay_linear()
 }
 
 
+/**
+ * @brief test if instrument configuration matches "single_delay_pixelated" type
+ * 
+ * @return true 
+ * @return false 
+ */
 bool Instrument::test_type_single_delay_pixelated()
 {
-    // if (interferometer.size() > 2 &&
-    //     camera.type == "monochrome_pixelated" &&
-    //     interferometer[0]->name == "Polariser" && 
-    //     interferometer[ilast]->name == "Polariser" &&
-    //     test_align90(interferometer[0], interferometer[ilast]))
-    // {
-    // }
+    size_t ilast = interferometer.size() - 1;
+    std::cout << "interferometer[0]->name = " << interferometer[0]->name << std::endl;
+    std::cout << "interferometer[ilast]->name = " << interferometer[ilast]->name << std::endl;
+
+    if (interferometer.size() > 2 &&
+        camera.type == "monochrome_polarised" &&
+        interferometer[0]->name == "Polariser" && 
+        interferometer[ilast]->name == "QuarterWaveplate" &&
+        test_align90(interferometer[0], interferometer[ilast]))
+    {
+        return true;
+    }
     return false;
 }
