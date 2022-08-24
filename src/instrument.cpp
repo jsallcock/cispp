@@ -58,7 +58,7 @@ Instrument::Instrument(std::string fp_config)
         else if (nd_int[i]["QuarterWaveplate"]){
             double orientation = nd_int[i]["QuarterWaveplate"]["orientation"].as<double>();
             // std::unique_ptr<Component> ptr = std::make_unique<UniaxialCrystal>(orientation, thickness, cut_angle, material);
-            auto ptr = std::make_unique<IdealWaveplate>(orientation, M_PI / 2);
+            auto ptr = std::make_unique<QuarterWaveplate>(orientation);
             interferometer.push_back(std::move(ptr));
         }
         

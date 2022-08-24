@@ -9,7 +9,7 @@
  * 
  * @return std::vector<double> 
  */
-std::vector<double> Camera::get_pixel_centres_x()
+std::vector<double> Camera::get_pixel_centres_x() const
 {
     std::vector<double> px(sensor_format_x);
     for (size_t i = 0; i < sensor_format_x; i++){
@@ -24,7 +24,7 @@ std::vector<double> Camera::get_pixel_centres_x()
  * 
  * @return std::vector<double> 
  */
-std::vector<double> Camera::get_pixel_lbounds_x()
+std::vector<double> Camera::get_pixel_lbounds_x() const
 {
     std::vector<double> px(sensor_format_x);
     for (size_t i = 0; i < sensor_format_x; i++){
@@ -39,7 +39,7 @@ std::vector<double> Camera::get_pixel_lbounds_x()
  * 
  * @return std::vector<double> 
  */
-std::vector<double> Camera::get_pixel_centres_y()
+std::vector<double> Camera::get_pixel_centres_y() const
 {
     std::vector<double> py(sensor_format_y);
     for (size_t i = 0; i < sensor_format_y; i++){
@@ -54,7 +54,7 @@ std::vector<double> Camera::get_pixel_centres_y()
  * 
  * @return std::vector<double> 
  */
-std::vector<double> Camera::get_pixel_lbounds_y()
+std::vector<double> Camera::get_pixel_lbounds_y() const
 {
     std::vector<double> py(sensor_format_y);
     for (size_t i = 0; i < sensor_format_y; i++){

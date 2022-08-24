@@ -125,6 +125,37 @@ class IdealWaveplate: public Retarder
     }
 };
 
+/**
+ * @brief Ideal quarter waveplate
+ * 
+ */
+class QuarterWaveplate: public IdealWaveplate
+{
+    public: 
+
+    QuarterWaveplate(double orientation)
+    : IdealWaveplate(orientation, M_PI / 2)
+    {
+        name = "QuarterWaveplate";
+    }
+};
+
+
+/**
+ * @brief Ideal half waveplate
+ * 
+ */
+class HalfWaveplate: public IdealWaveplate
+{
+    public:
+    
+    HalfWaveplate(double orientation)
+    : IdealWaveplate(orientation, M_PI)
+    {
+        name = "HalfWaveplate";
+    }
+};
+
 
 /**
  * @brief Plane-parallel, uniaxial, birefringent crystal plate

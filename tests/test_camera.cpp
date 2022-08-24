@@ -11,7 +11,18 @@ int main()
     double quantum_efficiency = 0.35;
     double epercount = 0.46;
     double cam_noise = 2.5;
-    Camera camera(sensor_format_x, sensor_format_y, pixel_size, bit_depth, quantum_efficiency, epercount, cam_noise);
+    std::string type = "monochrome";
+    Camera camera(
+        sensor_format_x, 
+        sensor_format_y, 
+        pixel_size, 
+        bit_depth, 
+        quantum_efficiency, 
+        epercount, 
+        cam_noise,
+        type
+    );
+
 
     // for (size_t i = 0; i < camera.sensor_format_x; i++)
     // {

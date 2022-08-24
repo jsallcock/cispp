@@ -36,44 +36,6 @@ class Camera
      * @param quantum_efficiency 
      * @param epercount 
      * @param cam_noise 
-     */
-    Camera
-    (
-        int sensor_format_x,
-        int sensor_format_y,
-        double pixel_size,
-        int bit_depth,
-        double quantum_efficiency,
-        double epercount,
-        double cam_noise
-    )
-    : sensor_format_x(sensor_format_x),
-      sensor_format_y(sensor_format_y), 
-      pixel_size(pixel_size),
-      bit_depth(bit_depth),
-      quantum_efficiency(quantum_efficiency),
-      epercount(epercount),
-      cam_noise(cam_noise),
-      sensor_halfwidth(0.5 * pixel_size * sensor_format_x),
-      sensor_halfheight(0.5 * pixel_size * sensor_format_y),
-      pixel_centres_x(get_pixel_centres_x()),
-      pixel_centres_y(get_pixel_centres_y()),
-      pixel_lbounds_x(get_pixel_lbounds_x()),
-      pixel_lbounds_y(get_pixel_lbounds_y())
-    {
-    }
-
-
-    /**
-     * @brief Construct a new Camera object
-     * 
-     * @param sensor_format_x 
-     * @param sensor_format_y 
-     * @param pixel_size 
-     * @param bit_depth 
-     * @param quantum_efficiency 
-     * @param epercount 
-     * @param cam_noise 
      * @param type 
      */
     Camera
@@ -124,13 +86,13 @@ class Camera
       pixel_lbounds_y(get_pixel_lbounds_y())
     {}
 
-    std::vector<double> get_pixel_centres_x();
+    std::vector<double> get_pixel_centres_x() const;
 
-    std::vector<double> get_pixel_centres_y();
+    std::vector<double> get_pixel_centres_y() const;
 
-    std::vector<double> get_pixel_lbounds_x();
+    std::vector<double> get_pixel_lbounds_x() const;
 
-    std::vector<double> get_pixel_lbounds_y();
+    std::vector<double> get_pixel_lbounds_y() const;
 
     size_t get_pixel_idx_x(double x);
 
