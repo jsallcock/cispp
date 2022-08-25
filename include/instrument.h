@@ -1,5 +1,5 @@
-#ifndef INSTRUMENT_H
-#define INSTRUMENT_H
+#ifndef CISPP_INSTRUMENT_H
+#define CISPP_INSTRUMENT_H
 #include <memory>
 #include <vector>
 #include <string>
@@ -9,12 +9,15 @@
 #include <iostream>
 #include <fstream>
 #include "yaml-cpp/yaml.h"
-#include "../include/camera.h"
-#include "../include/component.h"
+#include "include/camera.h"
+#include "include/component.h"
 
 using std::vector;
 using std::unique_ptr;
 using std::string;
+
+
+namespace cispp {
 
 
 class Instrument
@@ -26,17 +29,17 @@ class Instrument
     double lens_1_focal_length;
     double lens_2_focal_length;
     double lens_3_focal_length;
-    Camera camera;
-    vector<unique_ptr<Component>> interferometer;
+    cispp::Camera camera;
+    vector<unique_ptr<cispp::Component>> interferometer;
     string fp_config;
 
     Instrument(std::string fp_config);
 
     void write_config();
 
-    double get_inc_angle(double x, double y, unique_ptr<Component>& component);
+    double get_inc_angle(double x, double y, unique_ptr<cispp::Component>& component);
 
-    double get_azim_angle(double x, double y, unique_ptr<Component>& component);
+    double get_azim_angle(double x, double y, unique_ptr<cispp::Component>& component);
 
     Eigen::Matrix4d get_mueller_matrix(double x, double y, double wavelength);
 
@@ -59,4 +62,6 @@ class Instrument
     void capture_single_delay_pixelated(double wavelength, double flux, vector<unsigned short int>* image);
 };
 
+
+} // namespace cispp
 #endif

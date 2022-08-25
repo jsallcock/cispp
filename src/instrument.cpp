@@ -1,10 +1,13 @@
 #include "yaml-cpp/yaml.h"
-#include "../include/instrument.h"
-#include "../include/camera.h"
+#include "include/instrument.h"
+#include "include/camera.h"
 
 using std::vector;
 using std::unique_ptr;
 using std::string;
+
+
+namespace cispp {
 
 
 /**
@@ -23,7 +26,7 @@ Instrument::Instrument(string fp_config)
     lens_2_focal_length = nd_config["lens_2_focal_length"].as<double>();
     lens_3_focal_length = nd_config["lens_3_focal_length"].as<double>();
 
-    camera = Camera(
+    camera = cispp::Camera(
         nd_cam["sensor_format"][0].as<int>(),  // sensor_format_x
         nd_cam["sensor_format"][1].as<int>(),  // sensor_format_y
         nd_cam["pixel_size"].as<double>(),
@@ -39,8 +42,7 @@ Instrument::Instrument(string fp_config)
     {
         if (nd_int[i]["LinearPolariser"]){
             double orientation = nd_int[i]["LinearPolariser"]["orientation"].as<double>();
-            // std::unique_ptr<Component> ptr = std::make_unique<Polariser>(orientation);
-            auto ptr = std::make_unique<Polariser>(orientation);
+            auto ptr = std::make_unique<cispp::Polariser>(orientation);
             interferometer.push_back(std::move(ptr));
         }
 
@@ -50,8 +52,7 @@ Instrument::Instrument(string fp_config)
             double cut_angle = nd_int[i]["UniaxialCrystal"]["cut_angle"].as<double>();
             std::string material = nd_int[i]["UniaxialCrystal"]["material"].as<std::string>();
             
-            // std::unique_ptr<Component> ptr = std::make_unique<UniaxialCrystal>(orientation, thickness, cut_angle, material);
-            auto ptr = std::make_unique<UniaxialCrystal>(orientation, thickness, cut_angle, material);
+            auto ptr = std::make_unique<cispp::UniaxialCrystal>(orientation, thickness, cut_angle, material);
             interferometer.push_back(std::move(ptr));    
 
             if (nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"]){
@@ -61,8 +62,7 @@ Instrument::Instrument(string fp_config)
 
         else if (nd_int[i]["QuarterWaveplate"]){
             double orientation = nd_int[i]["QuarterWaveplate"]["orientation"].as<double>();
-            // std::unique_ptr<Component> ptr = std::make_unique<UniaxialCrystal>(orientation, thickness, cut_angle, material);
-            auto ptr = std::make_unique<QuarterWaveplate>(orientation);
+            auto ptr = std::make_unique<cispp::QuarterWaveplate>(orientation);
             interferometer.push_back(std::move(ptr));
         }
         
@@ -83,7 +83,7 @@ Instrument::Instrument(string fp_config)
 * @param component unique pointer to interferometer component
 * @return double 
 */
-double Instrument::get_inc_angle(double x, double y, unique_ptr<Component>& component)
+double Instrument::get_inc_angle(double x, double y, unique_ptr<cispp::Component>& component)
 {
     return atan2(sqrt(pow(x,2) + pow(y,2)), lens_3_focal_length);
 }
@@ -97,7 +97,7 @@ double Instrument::get_inc_angle(double x, double y, unique_ptr<Component>& comp
 * @param component unique pointer to interferometer component
 * @return double 
 */
-double Instrument::get_azim_angle(double x, double y, unique_ptr<Component>& component)
+double Instrument::get_azim_angle(double x, double y, unique_ptr<cispp::Component>& component)
 {
     return atan2(y, x) + M_PI - (component->orientation * M_PI / 180);
 }
@@ -137,7 +137,7 @@ Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavele
  * @brief save captured image to .PPM image file
  * 
  * @param fpath filepath (.PPM)
- * @param image 
+ * @param image pointer to image vector (row-major order)
  */
 void Instrument::image_to_file(string fpath, vector<unsigned short int>* image)
 {
@@ -228,12 +228,12 @@ bool Instrument::test_type_single_delay_pixelated()
 
 
 /**
- * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light
+ * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light (general)
  * 
  * This is really an approximation: perfectly monochromatic, unpolarised light is impossible!
  * @param wavelength wavelength of light in metres
  * @param flux photon flux
- * @param image pointer to vector to populate with the captured image data
+ * @param image pointer to image vector (row-major order)
  */
 void Instrument::capture(double wavelength, double flux, vector<unsigned short int>* image)
 {
@@ -250,10 +250,11 @@ void Instrument::capture(double wavelength, double flux, vector<unsigned short i
 
 
 /**
- * @brief 
+ * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light (Mueller model)
  * 
- * @param wavelength 
- * @param flux 
+ * @param wavelength wavelength of light in metres
+ * @param flux photon flux
+ * @param image pointer to image vector (row-major order)
  */
 void Instrument::capture_mueller(double wavelength, double flux, vector<unsigned short int>* image)
 {
@@ -279,10 +280,11 @@ void Instrument::capture_mueller(double wavelength, double flux, vector<unsigned
 
 
 /**
- * @brief 
+ * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light (single_delay_linear)
  * 
- * @param wavelength 
- * @param flux 
+ * @param wavelength wavelength of light in metres
+ * @param flux photon flux
+ * @param image pointer to image vector (row-major order)
  */
 void Instrument::capture_single_delay_linear(double wavelength, double flux, vector<unsigned short int>* image)
 {
@@ -305,7 +307,13 @@ void Instrument::capture_single_delay_linear(double wavelength, double flux, vec
     }
 }
 
-
+/**
+ * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light (single_delay_pixelated)
+ * 
+ * @param wavelength wavelength of light in metres
+ * @param flux photon flux
+ * @param image pointer to image vector (row-major order)
+ */
 void Instrument::capture_single_delay_pixelated(double wavelength, double flux, vector<unsigned short int>* image)
 {
     for (size_t j = 0; j < camera.sensor_format_y; j++) {
@@ -330,3 +338,6 @@ void Instrument::capture_single_delay_pixelated(double wavelength, double flux, 
         }
     }
 }
+
+
+} // namespace cispp

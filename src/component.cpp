@@ -2,8 +2,11 @@
 #include <iostream>
 #include <cmath>
 #include <Eigen/Dense>
-#include "../include/component.h"
-#include "../include/material.h"
+#include "include/component.h"
+#include "include/material.h"
+
+
+namespace cispp {
 
 
 /**
@@ -112,21 +115,21 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
     double ne = neno.first; 
     double no = neno.second;
 
-    double s_inc_angle = sin(inc_angle);
-    double s_cut_angle = sin(cut_angle);
-    double c_cut_angle = cos(cut_angle);
-    double s_azim_angle = sin(azim_angle);
-    double c_azim_angle = cos(azim_angle);
-    double s_inc_angle2 = pow(s_inc_angle, 2);
-    double s_cut_angle2 = pow(s_cut_angle, 2);
-    double c_cut_angle2 = pow(c_cut_angle, 2);
+    double s_inc = sin(inc_angle);
+    double s_cut = sin(cut_angle);
+    double c_cut = cos(cut_angle);
+    double s_azim = sin(azim_angle);
+    double c_azim = cos(azim_angle);
+    double s_inc2 = pow(s_inc, 2);
+    double s_cut2 = pow(s_cut, 2);
+    double c_cut2 = pow(c_cut, 2);
     double no2 = pow(no, 2);
     double ne2 = pow(ne, 2);
-    double p = ne2 * s_cut_angle2 + no2 * c_cut_angle2;
+    double p = ne2 * s_cut2 + no2 * c_cut2;
 
-    double term_1 = sqrt(no2 - s_inc_angle2);
-    double term_2 = (no2 - ne2) * (s_cut_angle * c_cut_angle * c_azim_angle * s_inc_angle) / p;
-    double term_3 = - no * sqrt((ne2 * p) - ((ne2 - (ne2 - no2) * c_cut_angle2 * pow(s_azim_angle,2)) * s_inc_angle2)) / p;
+    double term_1 = sqrt(no2 - s_inc2);
+    double term_2 = (no2 - ne2) * (s_cut * c_cut * c_azim * s_inc) / p;
+    double term_3 = - no * sqrt((ne2 * p) - ((ne2 - (ne2 - no2) * c_cut2 * pow(s_azim,2)) * s_inc2)) / p;
 
     return 2 * M_PI * (thickness / wavelength) * (term_1 + term_2 + term_3);
 }
@@ -158,3 +161,5 @@ bool test_align45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c
 {
     return abs(fmod(c1->orientation - c2->orientation, 90)) == 45.;
 }
+
+} // namespace cispp

@@ -1,11 +1,14 @@
 
-#ifndef COMPONENT_H
-#define COMPONENT_H
+#ifndef CISPP_COMPONENT_H
+#define CISPP_COMPONENT_H
 #include <string>
 #include <iostream>
 #include <cmath>
 #include <Eigen/Dense>
-#include "../include/material.h"
+#include "include/material.h"
+
+
+namespace cispp {
 
 
 Eigen::Matrix4d get_rotation_matrix(double angle);
@@ -204,4 +207,6 @@ bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c
 
 bool test_align45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
 
+
+} // namespace cispp
 #endif

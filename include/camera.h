@@ -1,9 +1,12 @@
-#ifndef CAMERA_H
-#define CAMERA_H
+#ifndef CISPP_CAMERA_H
+#define CISPP_CAMERA_H
 #include <string>
 #include <vector>
 #include <Eigen/Dense>
-#include "../include/component.h"
+#include "include/component.h"
+
+
+namespace cispp {
 
 
 class Camera
@@ -103,4 +106,6 @@ class Camera
     Eigen::Matrix4d get_mueller_matrix(double x, double y);
 };
 
+
+}  // namespace cispp
 #endif

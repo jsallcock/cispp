@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/component.h"
+#include "include/component.h"
 
 
 int main()

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/camera.h"
+#include "include/camera.h"
 
 
 int main()
@@ -12,7 +12,7 @@ int main()
     double epercount = 0.46;
     double cam_noise = 2.5;
     std::string type = "monochrome";
-    Camera camera(
+    cispp::Camera camera(
         sensor_format_x, 
         sensor_format_y, 
         pixel_size, 

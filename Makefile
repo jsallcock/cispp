@@ -1,6 +1,7 @@
-CXXFLAGS := -std=c++17
+CXXFLAGS :=-std=c++17
 CXXFLAGS+=-O2
 CXXFLAGS+=-Wall
+CXXFLAGS+=-I.
 
 
 all: build/test_material build/test_component build/test_camera build/test_instrument

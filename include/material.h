@@ -1,9 +1,11 @@
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#ifndef CISPP_MATERIAL_H
+#define CISPP_MATERIAL_H
 #include <string>
 #include <vector>
 #include <cmath>
 
+
+namespace cispp {
 
 
 struct MaterialProperties
@@ -13,9 +15,9 @@ struct MaterialProperties
     std::vector<double> sellmeier_o;
 };
 
-MaterialProperties get_material_properties(std::string material_name);
+cispp::MaterialProperties get_material_properties(std::string material_name);
 
-std::pair<double, double> get_refractive_indices(double wavelength, MaterialProperties &mp);
+std::pair<double, double> get_refractive_indices(double wavelength, cispp::MaterialProperties &mp);
 
 double sellmeier_eqn(double wl_um2, double A, double B, double C, double D);
 
@@ -23,4 +25,6 @@ double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, doub
 
 double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, double E, double F);
 
+
+} // namespace cispp
 #endif

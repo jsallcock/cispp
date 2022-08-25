@@ -3,7 +3,10 @@
 #include <cmath>
 #include <stdexcept>
 #include "yaml-cpp/yaml.h"
-#include "../include/material.h"
+#include "include/material.h"
+
+
+namespace cispp {
 
 
 /**
@@ -160,3 +163,5 @@ double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, doub
     return sqrt((A * wl_um2 / (wl_um2 - B)) + (C * wl_um2 / (wl_um2 - D)) + (E * wl_um2 / (wl_um2 - F)) + 1);
 }
 
+
+} // namespace cispp
