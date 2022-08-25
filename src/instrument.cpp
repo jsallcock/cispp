@@ -2,13 +2,17 @@
 #include "../include/instrument.h"
 #include "../include/camera.h"
 
+using std::vector;
+using std::unique_ptr;
+using std::string;
+
 
 /**
 * @brief Construct Instrument from .YAML config file
 * 
 * @param fp_config 
 */
-Instrument::Instrument(std::string fp_config)
+Instrument::Instrument(string fp_config)
 : fp_config(fp_config)
 {
     YAML::Node nd_config = YAML::LoadFile(fp_config);
@@ -27,11 +31,11 @@ Instrument::Instrument(std::string fp_config)
         nd_cam["qe"].as<double>(),
         nd_cam["epercount"].as<double>(),
         nd_cam["cam_noise"].as<double>(),
-        nd_cam["type"].as<std::string>()
+        nd_cam["type"].as<string>()
     );
 
     // loop over interferometer components
-    for (std::size_t i = 0; i < nd_int.size(); i++)
+    for (size_t i = 0; i < nd_int.size(); i++)
     {
         if (nd_int[i]["LinearPolariser"]){
             double orientation = nd_int[i]["LinearPolariser"]["orientation"].as<double>();
@@ -72,28 +76,28 @@ Instrument::Instrument(std::string fp_config)
 
 
 /**
-* @brief Incidence angle of ray through component in radians
+* @brief Incidence angle in radians of ray through interferometer component
 * 
 * @param x x position on sensor plane in metres
 * @param y y position on sensor plane in metres
 * @param component unique pointer to interferometer component
 * @return double 
 */
-double Instrument::get_inc_angle(double x, double y, std::unique_ptr<Component>& component)
+double Instrument::get_inc_angle(double x, double y, unique_ptr<Component>& component)
 {
     return atan2(sqrt(pow(x,2) + pow(y,2)), lens_3_focal_length);
 }
-    
+
 
 /**
-* @brief Azimuthal angle of ray through component in radians
+* @brief Azimuthal angle in radians of ray through interfereometer component
 * 
 * @param x x position on sensor plane in metres
 * @param y y position on sensor plane in metres
 * @param component unique pointer to interferometer component
 * @return double 
 */
-double Instrument::get_azim_angle(double x, double y, std::unique_ptr<Component>& component)
+double Instrument::get_azim_angle(double x, double y, unique_ptr<Component>& component)
 {
     return atan2(y, x) + M_PI - (component->orientation * M_PI / 180);
 }
@@ -110,7 +114,7 @@ double Instrument::get_azim_angle(double x, double y, std::unique_ptr<Component>
 Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavelength)
 {
     Eigen::Matrix4d mtot;
-    for (std::size_t i = 0; i < interferometer.size(); i++)
+    for (size_t i = 0; i < interferometer.size(); i++)
     {  
         double inc_angle = get_inc_angle(x, y, interferometer[i]);
         double azim_angle = get_azim_angle(x, y, interferometer[i]);
@@ -130,80 +134,24 @@ Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavele
 
 
 /**
-* @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light
-* 
-* (But remember monochromatic, unpolarised light is impossible!)
-* Saves image to PPM format for testing.
-* @param wavelength 
-*/
-void Instrument::capture(double wavelength, double flux)
+ * @brief save captured image to .PPM image file
+ * 
+ * @param fpath filepath (.PPM)
+ * @param image 
+ */
+void Instrument::image_to_file(string fpath, vector<unsigned short int>* image)
 {
-    std::vector<double> x = camera.get_pixel_centres_x();
-    std::vector<double> y = camera.get_pixel_centres_y();
     std::ofstream file;
-    file.open ("out.ppm");
-    // int max_counts = 255;
+    file.open(fpath);
     file << "P3\n" << camera.sensor_format_x << " " << camera.sensor_format_y << "\n255\n";
-
-
-    if (type == "single_delay_linear")
-    {
-        std::cout << "capture: single_delay_linear" << std::endl;
-        for (std::size_t j = 0; j < y.size(); j++){
-            for (std::size_t i = 0; i < x.size(); i++){
-                double inc_angle = get_inc_angle(x[i], y[j], interferometer[1]);
-                double azim_angle = get_azim_angle(x[i], y[j], interferometer[1]);
-                double delay = interferometer[1]->get_delay(wavelength, inc_angle, azim_angle);
-                int counts = static_cast<int>((flux / 4) * (1 + cos(delay)));
-
-                file << counts << ' ' << counts << ' ' << counts << '\n';
-            }
+    for (size_t j = 0; j < camera.sensor_format_y; j++) {
+        size_t idx_col = j * camera.sensor_format_x;
+        for (size_t i = 0; i < camera.sensor_format_x; i++) {
+            unsigned short int counts = (*image)[i + idx_col];
+            file << counts << ' ' << counts << ' ' << counts << '\n';
         }
-        file.close();
     }
-
-    else if (type == "single_delay_pixelated")
-    {
-        std::cout << "capture: single_delay_pixelated" << std::endl;
-        for (std::size_t j = 0; j < y.size(); j++){
-            for (std::size_t i = 0; i < x.size(); i++){
-                double inc_angle = get_inc_angle(x[i], y[j], interferometer[1]);
-                double azim_angle = get_azim_angle(x[i], y[j], interferometer[1]);
-                double delay = interferometer[1]->get_delay(wavelength, inc_angle, azim_angle);
-                double mask = camera.get_pixelated_phase_mask(x[i], y[j]);
-                int counts = static_cast<int>((flux / 4) * (1 + cos(delay + mask)));
-
-                file << counts << ' ' << counts << ' ' << counts << '\n';
-            }
-        }
-        file.close();
-    }
-
-
-    else if (type == "mueller")
-    {
-        std::cout << "capture: mueller" << std::endl;
-        Eigen::Vector4d stokes_in;
-        Eigen::Vector4d stokes_out;
-        stokes_in[0] = flux;
-        stokes_in[1] = 0;
-        stokes_in[2] = 0;
-        stokes_in[3] = 0;
-
-        for (std::size_t j = 0; j < y.size(); j++){
-            for (std::size_t i = 0; i < x.size(); i++){
-                stokes_out = get_mueller_matrix(x[i], y[j], wavelength) * stokes_in;
-                int counts = static_cast<int>(stokes_out[0]);
-
-                file << counts << ' ' << counts << ' ' << counts << '\n';
-            }
-        }
-        file.close();
-    }
-
-    else {
-        throw std::logic_error("invalid instrument type");
-    }
+    file.close();
 }
 
 
@@ -214,14 +162,12 @@ void Instrument::capture(double wavelength, double flux)
  */
  std::string Instrument::get_type()
  {
-    if (test_type_single_delay_linear()){
+    if (test_type_single_delay_linear()) {
         return "single_delay_linear";
     }
-
-    else if (test_type_single_delay_pixelated()){
+    else if (test_type_single_delay_pixelated()) {
         return "single_delay_pixelated";
     }
-
     else return "mueller";
  }
 
@@ -242,7 +188,7 @@ bool Instrument::test_type_single_delay_linear()
         test_align90(interferometer[0], interferometer[ilast]))
     {
         size_t rcount = 0;
-        for (int i=1; i<ilast; i++)
+        for (size_t i=1; i<ilast; i++)
         {
             if (interferometer[i]->name == "Retarder" && 
                 test_align45(interferometer[i], interferometer[0])){
@@ -278,4 +224,109 @@ bool Instrument::test_type_single_delay_pixelated()
         return true;
     }
     return false;
+}
+
+
+/**
+ * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light
+ * 
+ * This is really an approximation: perfectly monochromatic, unpolarised light is impossible!
+ * @param wavelength wavelength of light in metres
+ * @param flux photon flux
+ * @param image pointer to vector to populate with the captured image data
+ */
+void Instrument::capture(double wavelength, double flux, vector<unsigned short int>* image)
+{
+    if (type == "single_delay_linear") {
+        capture_single_delay_linear(wavelength, flux, image);
+    }
+    else if (type == "single_delay_pixelated") {
+        capture_single_delay_pixelated(wavelength, flux, image);
+    }
+    else {
+        capture_mueller(wavelength, flux, image);
+    }
+}
+
+
+/**
+ * @brief 
+ * 
+ * @param wavelength 
+ * @param flux 
+ */
+void Instrument::capture_mueller(double wavelength, double flux, vector<unsigned short int>* image)
+{
+    assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
+    Eigen::Vector4d stokes_in;
+    Eigen::Vector4d stokes_out;
+    stokes_in[0] = flux;
+    stokes_in[1] = 0;
+    stokes_in[2] = 0;
+    stokes_in[3] = 0;
+    for (size_t j = 0; j < camera.sensor_format_y; j++){
+        size_t idx_col = j * camera.sensor_format_x;
+        for (size_t i = 0; i < camera.sensor_format_x; i++){
+            stokes_out = get_mueller_matrix(
+                camera.pixel_centres_x[i], 
+                camera.pixel_centres_y[j], 
+                wavelength
+            ) * stokes_in;
+            (*image)[i + idx_col] = static_cast<unsigned short int>(stokes_out[0]);
+        }
+    }
+}
+
+
+/**
+ * @brief 
+ * 
+ * @param wavelength 
+ * @param flux 
+ */
+void Instrument::capture_single_delay_linear(double wavelength, double flux, vector<unsigned short int>* image)
+{
+    for (size_t j = 0; j < camera.sensor_format_y; j++) {
+        size_t idx_col = j * camera.sensor_format_x;
+        for (size_t i = 0; i < camera.sensor_format_x; i++) {
+            double inc_angle = get_inc_angle(
+                camera.pixel_centres_x[i], 
+                camera.pixel_centres_y[j], 
+                interferometer[1]
+            );
+            double azim_angle = get_azim_angle(
+                camera.pixel_centres_x[i], 
+                camera.pixel_centres_y[j], 
+                interferometer[1]
+            );
+            double delay = interferometer[1]->get_delay(wavelength, inc_angle, azim_angle);
+            (*image)[i + idx_col] = static_cast<unsigned short int>((flux / 4) * (1 + cos(delay)));
+        }
+    }
+}
+
+
+void Instrument::capture_single_delay_pixelated(double wavelength, double flux, vector<unsigned short int>* image)
+{
+    for (size_t j = 0; j < camera.sensor_format_y; j++) {
+        size_t idx_col = j * camera.sensor_format_x;
+        for (size_t i = 0; i < camera.sensor_format_x; i++) {
+            double inc_angle = get_inc_angle(
+                camera.pixel_centres_x[i], 
+                camera.pixel_centres_y[j], 
+                interferometer[1]
+            );
+            double azim_angle = get_azim_angle(
+                camera.pixel_centres_x[i], 
+                camera.pixel_centres_y[j], 
+                interferometer[1]
+            );
+            double delay = interferometer[1]->get_delay(wavelength, inc_angle, azim_angle);
+            double mask = camera.get_pixelated_phase_mask(
+                camera.pixel_centres_x[i],
+                camera.pixel_centres_y[j]
+            );
+            (*image)[i + idx_col] = static_cast<unsigned short int>((flux / 4) * (1 + cos(delay + mask)));
+        }
+    }
 }
