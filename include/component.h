@@ -10,137 +10,169 @@
 
 namespace cispp {
 
-
+/**
+ * @brief Mueller matrix for frame rotation
+ * @param angle angle of rotation in radians, anti-clockwise from x-axis.
+ * @return rotation matrix
+ */
 Eigen::Matrix4d get_rotation_matrix(double angle);
 
+
 /**
- * @brief abstract base class for interferometer component
+ * @brief Interferometer component (abstract base class)
  * 
+ * Base component is a homogeneous diattenuating retarder whose key properties (retardance [delay], x-transmittance, 
+ * y-transmittance) have arbitrary dependence on wavelength / ray incidence angle / ray azimuthal angle.
  */
 class Component
 {
     public:
 
-    std::string name;
-    double orientation {0};
+    double orientation {0}; 
+    double tilt_x {0};
+    double tilt_y {0};
+
+    Component()
+    {}
     
-    /**
-     * @brief Construct a new Component object
-     * 
-     * @param orientation 
-     */
     Component(double orientation)
     : orientation(orientation)
     {}
 
+    Component(double orientation, double tilt_x, double tilt_y)
+    : orientation(orientation),
+      tilt_x(tilt_x),
+      tilt_y(tilt_y)
+    {}
+
     virtual ~Component() = default;
 
-    virtual Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) = 0;
+    /**
+     * @brief Transmittance for light linearly polarised in alignment with component axis
+     * 
+     * @param wavelength wavelength of light (metres)
+     * @param inc_angle incidence angle of light (radians)
+     * @param azim_angle azimuthal angle of light (radians)
+     * @return double 
+     */
+    virtual double get_t1(double wavelength, double inc_angle, double azim_angle) = 0;
 
+
+    /**
+     * @brief Transmittance for light linearly polarised orthogonal to component axis
+     * 
+     * @param wavelength wavelength of light (metres)
+     * @param inc_angle incidence angle of light (radians)
+     * @param azim_angle azimuthal angle of light (radians)
+     * @return double 
+     */
+    virtual double get_t2(double wavelength, double inc_angle, double azim_angle) = 0;
+
+
+    /**
+     * @brief Retardance in radians
+     * 
+     * @param wavelength wavelength of light (metres)
+     * @param inc_angle incidence angle of light (radians)
+     * @param azim_angle azimuthal angle of light (radians)
+     * @return double 
+     */
     virtual double get_delay(double wavelength, double inc_angle, double azim_angle) = 0;
+
+
+    /**
+    * @brief Calculate Mueller matrix for light ray
+    * 
+    * @param wavelength wavelength of light (metres)
+    * @param inc_angle incidence angle of light (radians)
+    * @param azim_angle azimuthal angle of light (radians) 
+    * @return Matrix4d 
+    */
+    virtual Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
 };
 
 
 /**
- * @brief Linear (partial) polariser
+ * @brief Ideal linear polariser
+ *
+ * Behaviour is independent of wavelength, ray incidence angle and ray azimuthal angle
  */
 class Polariser: public Component
 {
     public:
 
-    double tx1 {1};
-    double tx2 {0};
+    Polariser()
+    : Component()
+    {}
 
     Polariser(double orientation)
     : Component(orientation)
-    {
-        name = "Polariser";
-    }
+    {}
 
-    Polariser(double orientation, double tx1, double tx2)
-    : Component(orientation), 
-      tx1(tx1), 
-      tx2(tx2)
-    {
-        name = "Polariser";
-    }
+    Polariser(double orientation, double tilt_x, double tilt_y)
+    : Component(orientation, tilt_x, tilt_y)
+    {}
+
+    double get_t1(double wavelength, double inc_angle, double azim_angle) override;
+
+    double get_t2(double wavelength, double inc_angle, double azim_angle) override;
+
+    double get_delay(double wavelength, double inc_angle, double azim_angle) override;
 
     Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
 
     Eigen::Matrix4d get_mueller_matrix();
-
-    double get_delay(double wavelength, double inc_angle, double azim_angle) override;
 };
 
 
 /**
- * @brief Linear retarder base class
+ * @brief Ideal linear retarder (abstract base class)
  */
 class Retarder: public Component
 {
     public:
 
-    double contrast_inst {1};
-    double tilt_x {0};
-    double tilt_y {0};
+    Retarder()
+    : Component()
+    {}
 
     Retarder(double orientation)
     : Component(orientation)
-    {
-        name = "Retarder";
-    }
+    {}
 
-    Retarder(double orientation, double contrast_inst)
-    : Component(orientation), contrast_inst(contrast_inst)
-    {
-        name = "Retarder";
-    }
+    Retarder(double orientation, double tilt_x, double tilt_y)
+    : Component(orientation, tilt_x, tilt_y)
+    {}
 
-    Retarder(double orientation, double contrast_inst, double tilt_x, double tilt_y)
-    : Component(orientation), contrast_inst(contrast_inst), tilt_x(tilt_x), tilt_y(tilt_y)
-    {
-        name = "Retarder";
-    }
+    double get_t1(double wavelength, double inc_angle, double azim_angle) override;
 
-    // virtual double get_delay(double wavelength, double inc_angle, double azim_angle) = 0;
+    double get_t2(double wavelength, double inc_angle, double azim_angle) override;
 
     Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
 };
 
 
 /**
- * @brief Ideal waveplate imparts same delay regardless of ray wavelength or ray path. 
- */
-class IdealWaveplate: public Retarder
-{
-    public:
-
-    double delay;
-
-    IdealWaveplate(double orientation, double delay)
-    : Retarder(orientation), 
-      delay(delay)
-    {}
-    
-    double get_delay(double wavelength, double inc_angle, double azim_angle) override 
-    {
-        return delay;
-    }
-};
-
-/**
  * @brief Ideal quarter waveplate
  * 
  */
-class QuarterWaveplate: public IdealWaveplate
+class QuarterWaveplate: public Retarder
 {
     public: 
 
+    QuarterWaveplate()
+    : Retarder()
+    {}
+
     QuarterWaveplate(double orientation)
-    : IdealWaveplate(orientation, M_PI / 2)
-    {
-        name = "QuarterWaveplate";
-    }
+    : Retarder(orientation)
+    {}
+
+    QuarterWaveplate(double orientation, double tilt_x, double tilt_y)
+    : Retarder(orientation, tilt_x, tilt_y)
+    {}
+
+    double get_delay(double wavelength, double inc_angle, double azim_angle) override;
 };
 
 
@@ -148,30 +180,32 @@ class QuarterWaveplate: public IdealWaveplate
  * @brief Ideal half waveplate
  * 
  */
-class HalfWaveplate: public IdealWaveplate
+class HalfWaveplate: public Retarder
 {
-    public:
-    
+    public: 
+
+    HalfWaveplate()
+    : Retarder()
+    {}
+
     HalfWaveplate(double orientation)
-    : IdealWaveplate(orientation, M_PI)
-    {
-        name = "HalfWaveplate";
-    }
+    : Retarder(orientation)
+    {}
+
+    HalfWaveplate(double orientation, double tilt_x, double tilt_y)
+    : Retarder(orientation, tilt_x, tilt_y)
+    {}
+
+    double get_delay(double wavelength, double inc_angle, double azim_angle) override;
 };
 
 
 /**
  * @brief Plane-parallel, uniaxial, birefringent crystal plate
+ *
  */
 class UniaxialCrystal: public Retarder
 {
-    // privately store refractive indices calculated for the previous wavelength
-    // avoids unnecessary re-calculation
-    // double wavelength_last;
-    // double ne_last;
-    // double no_last;
-    // actually this gave no performance benefit
-
     public:
 
     double thickness;
@@ -182,21 +216,23 @@ class UniaxialCrystal: public Retarder
     * @brief Constructor specifying material properties by material name
     * 
     * @param orientation 
-    * @param thickness 
-    * @param cut_angle 
+    * @param thickness plate thickness (metres)
+    * @param cut_angle plate cut angle (radians)
     * @param material_name 
     */
     UniaxialCrystal
     (
-        double orientation, 
+        double orientation,
+        double tilt_x,
+        double tilt_y,
         double thickness, 
         double cut_angle,
         std::string material_name
     )
-    : Retarder(orientation), 
-    thickness(thickness), 
-    cut_angle(cut_angle * M_PI / 180),
-    material(get_material_properties(material_name))
+    : Retarder(orientation, tilt_x, tilt_y), 
+      thickness(thickness), 
+      cut_angle(cut_angle),
+      material(get_material_properties(material_name))
     {}
     
     double get_delay(double wavelength, double inc_angle, double azim_angle) override;

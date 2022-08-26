@@ -41,27 +41,41 @@ Instrument::Instrument(string fp_config)
     for (size_t i = 0; i < nd_int.size(); i++)
     {
         if (nd_int[i]["LinearPolariser"]){
-            double orientation = nd_int[i]["LinearPolariser"]["orientation"].as<double>();
+            std::cout << "LinearPolariser" << '\n';
+            double orientation = nd_int[i]["LinearPolariser"]["orientation"].as<double>() * M_PI / 180;
             auto ptr = std::make_unique<cispp::Polariser>(orientation);
             interferometer.push_back(std::move(ptr));
         }
 
         else if (nd_int[i]["UniaxialCrystal"]){
-            double orientation = nd_int[i]["UniaxialCrystal"]["orientation"].as<double>();
+            std::cout << "UniaxialCrystal" << '\n';
+            double orientation = nd_int[i]["UniaxialCrystal"]["orientation"].as<double>() * M_PI / 180;
+            double tilt_x = nd_int[i]["UniaxialCrystal"]["tilt_x"].as<double>(0);
+            double tilt_y = nd_int[i]["UniaxialCrystal"]["tilt_y"].as<double>(0);
             double thickness = nd_int[i]["UniaxialCrystal"]["thickness"].as<double>();
-            double cut_angle = nd_int[i]["UniaxialCrystal"]["cut_angle"].as<double>();
+            double cut_angle = nd_int[i]["UniaxialCrystal"]["cut_angle"].as<double>() * M_PI / 180;
             std::string material = nd_int[i]["UniaxialCrystal"]["material"].as<std::string>();
             
-            auto ptr = std::make_unique<cispp::UniaxialCrystal>(orientation, thickness, cut_angle, material);
+            auto ptr = std::make_unique<cispp::UniaxialCrystal>(
+                orientation, 
+                tilt_x,
+                tilt_y,
+                thickness, 
+                cut_angle, 
+                material
+            );
+            // std::cout << "delay = " << ptr -> get_delay(500e-9, 0, 0) << std::endl;
+            // std::cout << "delay = " << ptr -> get_delay(500e-9, M_PI / 180, 0) << std::endl;
             interferometer.push_back(std::move(ptr));    
 
-            if (nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"]){
-                std::cout << "sellmeier coefficients found" << std::endl;
-            }    
+            // if (nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"]){
+            //     std::cout << "sellmeier coefficients found" << std::endl;
+            // }    
         }
 
         else if (nd_int[i]["QuarterWaveplate"]){
-            double orientation = nd_int[i]["QuarterWaveplate"]["orientation"].as<double>();
+            std::cout << "QuarterWaveplate" << '\n';
+            double orientation = nd_int[i]["QuarterWaveplate"]["orientation"].as<double>() * M_PI / 180;
             auto ptr = std::make_unique<cispp::QuarterWaveplate>(orientation);
             interferometer.push_back(std::move(ptr));
         }
@@ -99,7 +113,7 @@ double Instrument::get_inc_angle(double x, double y, unique_ptr<cispp::Component
 */
 double Instrument::get_azim_angle(double x, double y, unique_ptr<cispp::Component>& component)
 {
-    return atan2(y, x) + M_PI - (component->orientation * M_PI / 180);
+    return atan2(y, x) + M_PI - (component->orientation);
 }
 
 
@@ -180,25 +194,25 @@ void Instrument::image_to_file(string fpath, vector<unsigned short int>* image)
  */
 bool Instrument::test_type_single_delay_linear()
 {
-    size_t ilast = interferometer.size() - 1;
-    if (interferometer.size() > 2 &&
-        camera.type == "monochrome" &&
-        interferometer[0]->name == "Polariser" && 
-        interferometer[ilast]->name == "Polariser" &&
-        test_align90(interferometer[0], interferometer[ilast]))
-    {
-        size_t rcount = 0;
-        for (size_t i=1; i<ilast; i++)
-        {
-            if (interferometer[i]->name == "Retarder" && 
-                test_align45(interferometer[i], interferometer[0])){
-                rcount++;
-            }
-        }
-        if (rcount == interferometer.size() - 2){
-            return true;
-        }
-    }
+    // size_t ilast = interferometer.size() - 1;
+    // if (interferometer.size() > 2 &&
+    //     camera.type == "monochrome" &&
+    //     interferometer[0]->name == "Polariser" && 
+    //     interferometer[ilast]->name == "Polariser" &&
+    //     test_align90(interferometer[0], interferometer[ilast]))
+    // {
+    //     size_t rcount = 0;
+    //     for (size_t i=1; i<ilast; i++)
+    //     {
+    //         if (interferometer[i]->name == "Retarder" && 
+    //             test_align45(interferometer[i], interferometer[0])){
+    //             rcount++;
+    //         }
+    //     }
+    //     if (rcount == interferometer.size() - 2){
+    //         return true;
+    //     }
+    // }
     return false;
 }
 
@@ -211,18 +225,18 @@ bool Instrument::test_type_single_delay_linear()
  */
 bool Instrument::test_type_single_delay_pixelated()
 {
-    size_t ilast = interferometer.size() - 1;
-    std::cout << "interferometer[0]->name = " << interferometer[0]->name << std::endl;
-    std::cout << "interferometer[ilast]->name = " << interferometer[ilast]->name << std::endl;
+    // size_t ilast = interferometer.size() - 1;
+    // std::cout << "interferometer[0]->name = " << interferometer[0]->name << std::endl;
+    // std::cout << "interferometer[ilast]->name = " << interferometer[ilast]->name << std::endl;
 
-    if (interferometer.size() > 2 &&
-        camera.type == "monochrome_polarised" &&
-        interferometer[0]->name == "Polariser" && 
-        interferometer[ilast]->name == "QuarterWaveplate" &&
-        test_align90(interferometer[0], interferometer[ilast]))
-    {
-        return true;
-    }
+    // if (interferometer.size() > 2 &&
+    //     camera.type == "monochrome_polarised" &&
+    //     interferometer[0]->name == "Polariser" && 
+    //     interferometer[ilast]->name == "QuarterWaveplate" &&
+    //     test_align90(interferometer[0], interferometer[ilast]))
+    // {
+    //     return true;
+    // }
     return false;
 }
 

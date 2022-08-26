@@ -15,7 +15,7 @@ int main ()
     // std::string fp_config = "/Users/jsallcock/fusion/ci/cispp/tests/config/single_delay_pixelated.yaml";
     cispp::Instrument inst(fp_config);
     std::cout << "inst.type = " << inst.type << std::endl;
-    std::vector<unsigned short int> image(inst.camera.sensor_format_x * inst.camera.sensor_format_y - 1);
+    std::vector<unsigned short int> image(inst.camera.sensor_format_x * inst.camera.sensor_format_y);
 
     auto start = std::chrono::high_resolution_clock::now();
     inst.capture(465e-9, 500, &image);

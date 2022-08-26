@@ -9,14 +9,9 @@
 namespace cispp {
 
 
-/**
- * @brief Mueller matrix for frame rotation
- * @param angle angle of rotation in degrees, anti-clockwise from x-axis.
- * @return rotation matrix
- */
 Eigen::Matrix4d get_rotation_matrix(double angle)
 {
-    double a2 = 2 * angle * M_PI / 180;
+    double a2 = 2 * angle;
     double s2 = sin(a2);
     double c2 = cos(a2);
     Eigen::Matrix4d m;
@@ -30,85 +25,98 @@ Eigen::Matrix4d get_rotation_matrix(double angle)
 }
 
 
-/**
- * @brief Calculate Mueller matrix for light ray
- * 
- * @param wavelength wavelength of light (metres)
- * @param inc_angle incidence angle of the light (radians)
- * @param azim_angle azimuthal angle of the light (radians)
- * @return Eigen::Matrix4d 
- */
-Eigen::Matrix4d Polariser::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
+Eigen::Matrix4d Component::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
 {
-    return get_mueller_matrix();
-};
-
-
-Eigen::Matrix4d Polariser::get_mueller_matrix()
-{
-    double tx1_sq = pow(tx1,2);
-    double tx2_sq = pow(tx2,2);
-    double sum = (tx1_sq + tx2_sq) / 2;
-    double diff = (tx1_sq - tx2_sq) / 2;
-    double prod = tx1 * tx2;
+    double delay = get_delay(wavelength, inc_angle, azim_angle);
+    double t1 = get_t1(wavelength, inc_angle, azim_angle);
+    double t2 = get_t2(wavelength, inc_angle, azim_angle);
+    double sum = (t1 + t2) / 2;
+    double diff = (t1 - t2) / 2;
+    double prod = 2 * sqrt(t1 * t2);
+    double psd = prod * sin(delay);
+    double pcd = prod * cos(delay);
     Eigen::Matrix4d m;
 
     m <<  sum, diff,    0,    0, 
          diff,  sum,    0,    0,
-            0,    0, prod,    0,
-            0,    0,    0, prod;
+            0,    0,  pcd,  psd,
+            0,    0, -psd,  pcd;
 
     Eigen::Matrix4d rot = get_rotation_matrix(orientation);
     return rot.transpose() * m * rot;
 }
 
-/**
- * @brief 
- * 
- * @param wavelength 
- * @param inc_angle 
- * @param azim_angle 
- * @return double 
- */
-double Polariser::get_delay(double wavelength, double inc_angle, double azim_angle)
-{
-    return 0;
+
+double Polariser::get_t1(double wavelength, double inc_angle, double azim_angle) {
+    return 1.;
 }
 
 
-/**
-* @brief Calculate Mueller matrix for light ray
-* 
-* @param wavelength wavelength of light (metres)
-* @param inc_angle incidence angle of the light (radians)
-* @param azim_angle azimuthal angle of the light (radians) 
-* @return Matrix4d 
-*/
+double Polariser::get_t2(double wavelength, double inc_angle, double azim_angle) {
+    return 0.;
+}
+
+
+double Polariser::get_delay(double wavelength, double inc_angle, double azim_angle) {
+    return 0.;
+}
+
+
+Eigen::Matrix4d Polariser::get_mueller_matrix()
+{
+    Eigen::Matrix4d m;
+    m << 0.5, 0.5,   0,   0, 
+         0.5, 0.5,   0,   0,
+           0,   0,   0,   0,
+           0,   0,   0,   0;
+
+    Eigen::Matrix4d rot = get_rotation_matrix(orientation);
+    return rot.transpose() * m * rot;
+}
+
+
+Eigen::Matrix4d Polariser::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) {
+    return get_mueller_matrix();
+}
+
+
+double Retarder::get_t1(double wavelength, double inc_angle, double azim_angle) {
+    return 1.;
+}
+
+
+double Retarder::get_t2(double wavelength, double inc_angle, double azim_angle) {
+    return 0.;
+}
+
+
 Eigen::Matrix4d Retarder::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
 {
     double delay = get_delay(wavelength, inc_angle, azim_angle);
-    double cdelay = contrast_inst * cos(delay);
-    double sdelay = contrast_inst * sin(delay);
-
+    double sd = sin(delay);
+    double cd = cos(delay);
     Eigen::Matrix4d m;
-    m << 1,       0,       0,       0,
-         0,       1,       0,       0,
-         0,       0,  cdelay,  sdelay,
-         0,       0, -sdelay,  cdelay;
+
+    m <<   1,   0,   0,   0, 
+           0,   1,   0,   0,
+           0,   0,  cd,  sd,
+           0,   0, -sd,  cd;
 
     Eigen::Matrix4d rot = get_rotation_matrix(orientation);
     return rot.transpose() * m * rot;
 }
 
 
-/**
-* @brief Calculate interferometer delay in radians between O and E light rays
-* 
-* @param wavelength wavelength of light (metres)
-* @param inc_angle incidence angle of the light (radians)
-* @param azim_angle azimuthal angle of the light (radians)
-* @return interferometer delay in radians
-*/
+double QuarterWaveplate::get_delay(double wavelength, double inc_angle, double azim_angle) {
+    return M_PI / 2;
+}
+
+
+double HalfWaveplate::get_delay(double wavelength, double inc_angle, double azim_angle) {
+    return M_PI;
+}
+
+
 double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double azim_angle)
 {
     std::pair<double, double> neno = get_refractive_indices(wavelength, material);
@@ -145,7 +153,7 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
  */
 bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
 {
-    return abs(fmod(c1->orientation - c2->orientation, 90)) == 0.;
+    return abs(fmod(c1->orientation - c2->orientation, M_PI / 2)) == 0.;
 }
 
 
@@ -159,7 +167,8 @@ bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c
  */
 bool test_align45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
 {
-    return abs(fmod(c1->orientation - c2->orientation, 90)) == 45.;
+    return abs(fmod(c1->orientation - c2->orientation, M_PI / 2)) == M_PI / 4;
 }
+
 
 } // namespace cispp
