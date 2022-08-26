@@ -64,8 +64,6 @@ Instrument::Instrument(string fp_config)
                 cut_angle, 
                 material
             );
-            // std::cout << "delay = " << ptr -> get_delay(500e-9, 0, 0) << std::endl;
-            // std::cout << "delay = " << ptr -> get_delay(500e-9, M_PI / 180, 0) << std::endl;
             interferometer.push_back(std::move(ptr));    
 
             // if (nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"]){
@@ -99,7 +97,9 @@ Instrument::Instrument(string fp_config)
 */
 double Instrument::get_inc_angle(double x, double y, unique_ptr<cispp::Component>& component)
 {
-    return atan2(sqrt(pow(x,2) + pow(y,2)), lens_3_focal_length);
+    double x0 = lens_3_focal_length * tan(component->tilt_x);
+    double y0 = lens_3_focal_length * tan(component->tilt_y);
+    return atan2(sqrt(pow(x-x0,2) + pow(y-y0,2)), lens_3_focal_length);
 }
 
 
@@ -113,7 +113,9 @@ double Instrument::get_inc_angle(double x, double y, unique_ptr<cispp::Component
 */
 double Instrument::get_azim_angle(double x, double y, unique_ptr<cispp::Component>& component)
 {
-    return atan2(y, x) + M_PI - (component->orientation);
+    double x0 = lens_3_focal_length * tan(component->tilt_x);
+    double y0 = lens_3_focal_length * tan(component->tilt_y);
+    return atan2(y-y0, x-x0) + M_PI - (component->orientation);
 }
 
 
