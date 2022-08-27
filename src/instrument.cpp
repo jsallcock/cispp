@@ -42,7 +42,7 @@ Instrument::Instrument(string fp_config)
     {
         if (nd_int[i]["LinearPolariser"]){
             std::cout << "LinearPolariser" << '\n';
-            double orientation = nd_int[i]["LinearPolariser"]["orientation"].as<double>() * M_PI / 180;
+            double orientation = nd_int[i]["LinearPolariser"]["orientation"].as<double>(0) * M_PI / 180;
             auto ptr = std::make_unique<cispp::Polariser>(orientation);
             interferometer.push_back(std::move(ptr));
         }
@@ -73,7 +73,7 @@ Instrument::Instrument(string fp_config)
 
         else if (nd_int[i]["QuarterWaveplate"]){
             std::cout << "QuarterWaveplate" << '\n';
-            double orientation = nd_int[i]["QuarterWaveplate"]["orientation"].as<double>() * M_PI / 180;
+            double orientation = nd_int[i]["QuarterWaveplate"]["orientation"].as<double>(0) * M_PI / 180;
             auto ptr = std::make_unique<cispp::QuarterWaveplate>(orientation);
             interferometer.push_back(std::move(ptr));
         }
@@ -149,12 +149,6 @@ Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavele
 }
 
 
-/**
- * @brief save captured image to .PPM image file
- * 
- * @param fpath filepath (.PPM)
- * @param image pointer to image vector (row-major order)
- */
 void Instrument::image_to_file(string fpath, vector<unsigned short int>* image)
 {
     std::ofstream file;
@@ -171,11 +165,6 @@ void Instrument::image_to_file(string fpath, vector<unsigned short int>* image)
 }
 
 
-/**
- * @brief determine instrument type based on configuraiton
- * 
- * @return std::string 
- */
  std::string Instrument::get_type()
  {
     if (test_type_single_delay_linear()) {

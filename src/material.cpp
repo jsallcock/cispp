@@ -19,7 +19,7 @@ MaterialProperties get_material_properties(std::string material_name)
     MaterialProperties mp = {};
     mp.name = material_name;
     // YAML::Node data = YAML::LoadFile("../data/material.yaml");
-    YAML::Node data = YAML::LoadFile("/Users/jsallcock/fusion/ci/cispp/data/material.yaml");
+    YAML::Node data = YAML::LoadFile("./data/material.yaml");
 
     if (!data[material_name]["sellmeier_coefficients"]){
         throw std::logic_error("invalid material_name");

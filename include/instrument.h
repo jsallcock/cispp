@@ -43,15 +43,30 @@ class Instrument
 
     Eigen::Matrix4d get_mueller_matrix(double x, double y, double wavelength);
 
+
+    /**
+     * @brief save captured image to .PPM image file
+     * 
+     * @param fpath filepath (.PPM)
+     * @param image pointer to image vector (row-major order)
+     */
     void image_to_file(string fpath, vector<unsigned short int>* image);
 
     void get_delay();
 
+
+    /**
+     * @brief Determine instrument type based on configuraiton
+     * 
+     * @return std::string 
+     */
     std::string get_type();
 
     bool test_type_single_delay_linear();
 
     bool test_type_single_delay_pixelated();
+
+    // ca
 
     void capture(double wavelength, double flux, vector<unsigned short int>* image);
 

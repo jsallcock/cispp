@@ -1,0 +1,42 @@
+# This file was generated automatically at 09:44:51, 02/06/2022
+camera:
+  bit_depth: 12
+  cam_noise: 2.5
+  epercount: 0.46
+  pixel_size: 3.45e-06
+  qe: 0.35
+  sensor_format:
+    - 2448
+    - 2048
+  type: monochrome_polarised
+interferometer:
+  - LinearPolariser:
+      orientation: 43.55601609207315
+      tx_1: 1
+      tx_2: 0
+  - Waveplate:
+      contrast: 1
+      material: a-BBO
+      orientation: 88.55601609207315
+      sellmeier_coefs:
+        Ae: 2.3813429619963147
+        Ao: 2.7471
+        Be: 0.010670369477930387
+        Bo: 0.01878
+        Ce: -0.027608674980819144
+        Co: -0.01822
+        De: -0.00515692336467137
+        Do: -0.01354
+      sellmeier_coefs_source: null
+      thickness: 0.00448
+      tilt_x: 0.15839314566972185
+      tilt_y: -0.15474000528675624
+  - QuarterWaveplate:
+      contrast: 1
+      delay: 1.5707963267948966
+      orientation: 133.55601609207315
+      tilt_x: 0
+      tilt_y: 0
+lens_1_focal_length: 0.032
+lens_2_focal_length: 0.105
+lens_3_focal_length: 0.14541380791302302

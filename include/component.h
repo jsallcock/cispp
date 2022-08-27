@@ -239,6 +239,16 @@ class UniaxialCrystal: public Retarder
 };
 
 
+/**
+ * @brief Savart plate
+ * 
+ */
+class SavartPlate: public Retarder
+{
+
+};
+
+
 bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
 
 bool test_align45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
