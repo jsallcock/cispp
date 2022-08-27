@@ -10,11 +10,6 @@ using std::string;
 namespace cispp {
 
 
-/**
-* @brief Construct Instrument from .YAML config file
-* 
-* @param fp_config 
-*/
 Instrument::Instrument(string fp_config)
 : fp_config(fp_config)
 {
@@ -40,15 +35,15 @@ Instrument::Instrument(string fp_config)
     // loop over interferometer components
     for (size_t i = 0; i < nd_int.size(); i++)
     {
-        if (nd_int[i]["LinearPolariser"]){
-            std::cout << "LinearPolariser" << '\n';
+        if (nd_int[i]["LinearPolariser"])
+        {
             double orientation = nd_int[i]["LinearPolariser"]["orientation"].as<double>(0) * M_PI / 180;
             auto ptr = std::make_unique<cispp::Polariser>(orientation);
-            interferometer.push_back(std::move(ptr));
+            components.push_back(std::move(ptr));
         }
 
-        else if (nd_int[i]["UniaxialCrystal"]){
-            std::cout << "UniaxialCrystal" << '\n';
+        else if (nd_int[i]["UniaxialCrystal"])
+        {
             double orientation = nd_int[i]["UniaxialCrystal"]["orientation"].as<double>() * M_PI / 180;
             double tilt_x = nd_int[i]["UniaxialCrystal"]["tilt_x"].as<double>(0);
             double tilt_y = nd_int[i]["UniaxialCrystal"]["tilt_y"].as<double>(0);
@@ -64,20 +59,20 @@ Instrument::Instrument(string fp_config)
                 cut_angle, 
                 material
             );
-            interferometer.push_back(std::move(ptr));    
+            components.push_back(std::move(ptr));   
 
             // if (nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"]){
             //     std::cout << "sellmeier coefficients found" << std::endl;
             // }    
         }
 
-        else if (nd_int[i]["QuarterWaveplate"]){
-            std::cout << "QuarterWaveplate" << '\n';
+        else if (nd_int[i]["QuarterWaveplate"])
+        {
             double orientation = nd_int[i]["QuarterWaveplate"]["orientation"].as<double>(0) * M_PI / 180;
             auto ptr = std::make_unique<cispp::QuarterWaveplate>(orientation);
-            interferometer.push_back(std::move(ptr));
+            components.push_back(std::move(ptr));
         }
-        
+
         else { 
             throw std::logic_error("Interferometer component was not understood.");
         }
@@ -87,12 +82,14 @@ Instrument::Instrument(string fp_config)
 }
 
 
+
+
 /**
 * @brief Incidence angle in radians of ray through interferometer component
 * 
 * @param x x position on sensor plane in metres
 * @param y y position on sensor plane in metres
-* @param component unique pointer to interferometer component
+* @param component unique pointer to component
 * @return double 
 */
 double Instrument::get_inc_angle(double x, double y, unique_ptr<cispp::Component>& component)
@@ -108,7 +105,7 @@ double Instrument::get_inc_angle(double x, double y, unique_ptr<cispp::Component
 * 
 * @param x x position on sensor plane in metres
 * @param y y position on sensor plane in metres
-* @param component unique pointer to interferometer component
+* @param component unique pointer to component
 * @return double 
 */
 double Instrument::get_azim_angle(double x, double y, unique_ptr<cispp::Component>& component)
@@ -120,7 +117,7 @@ double Instrument::get_azim_angle(double x, double y, unique_ptr<cispp::Componen
 
 
 /**
-* @brief Total Mueller matrix for interferometer
+* @brief Total Mueller matrix for instrument
 * 
 * @param x x position on sensor plane in metres
 * @param y y position on sensor plane in metres
@@ -130,11 +127,11 @@ double Instrument::get_azim_angle(double x, double y, unique_ptr<cispp::Componen
 Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavelength)
 {
     Eigen::Matrix4d mtot;
-    for (size_t i = 0; i < interferometer.size(); i++)
+    for (size_t i = 0; i < components.size(); i++)
     {  
-        double inc_angle = get_inc_angle(x, y, interferometer[i]);
-        double azim_angle = get_azim_angle(x, y, interferometer[i]);
-        Eigen::Matrix4d m = interferometer[i]->get_mueller_matrix(wavelength, inc_angle, azim_angle);
+        double inc_angle = get_inc_angle(x, y, components[i]);
+        double azim_angle = get_azim_angle(x, y, components[i]);
+        Eigen::Matrix4d m = components[i]->get_mueller_matrix(wavelength, inc_angle, azim_angle);
         if (i==0){
             mtot = m;
         }
@@ -185,25 +182,25 @@ void Instrument::image_to_file(string fpath, vector<unsigned short int>* image)
  */
 bool Instrument::test_type_single_delay_linear()
 {
-    // size_t ilast = interferometer.size() - 1;
-    // if (interferometer.size() > 2 &&
-    //     camera.type == "monochrome" &&
-    //     interferometer[0]->name == "Polariser" && 
-    //     interferometer[ilast]->name == "Polariser" &&
-    //     test_align90(interferometer[0], interferometer[ilast]))
-    // {
-    //     size_t rcount = 0;
-    //     for (size_t i=1; i<ilast; i++)
-    //     {
-    //         if (interferometer[i]->name == "Retarder" && 
-    //             test_align45(interferometer[i], interferometer[0])){
-    //             rcount++;
-    //         }
-    //     }
-    //     if (rcount == interferometer.size() - 2){
-    //         return true;
-    //     }
-    // }
+    size_t n = components.size();
+    if (n > 2 &&
+        camera.type == "monochrome" &&
+        components[0]->is_polariser() && 
+        components[n-1]->is_polariser() &&
+        test_align90(components[0], components[n-1]))
+    {
+        size_t rcount = 0;
+        for (size_t i=1; i<n-1; i++)
+        {
+            if (components[i]->is_retarder() && 
+                test_align45(components[i], components[0])) {
+                rcount++;
+            }
+        }
+        if (rcount == n-2) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -216,18 +213,25 @@ bool Instrument::test_type_single_delay_linear()
  */
 bool Instrument::test_type_single_delay_pixelated()
 {
-    // size_t ilast = interferometer.size() - 1;
-    // std::cout << "interferometer[0]->name = " << interferometer[0]->name << std::endl;
-    // std::cout << "interferometer[ilast]->name = " << interferometer[ilast]->name << std::endl;
-
-    // if (interferometer.size() > 2 &&
-    //     camera.type == "monochrome_polarised" &&
-    //     interferometer[0]->name == "Polariser" && 
-    //     interferometer[ilast]->name == "QuarterWaveplate" &&
-    //     test_align90(interferometer[0], interferometer[ilast]))
-    // {
-    //     return true;
-    // }
+    size_t n = components.size();
+    if (n > 2 &&
+        camera.type == "monochrome_polarised" &&
+        components[0]->is_polariser() && 
+        components[n-1]->is_quarterwaveplate() &&
+        test_align90(components[0], components[n-1]))
+    {
+        size_t rcount = 0;
+        for (size_t i=1; i<n-1; i++)
+        {
+            if (components[i]->is_retarder() && 
+                test_align45(components[i], components[0])) {
+                rcount++;
+            }
+        }
+        if (rcount == n-2) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -299,14 +303,14 @@ void Instrument::capture_single_delay_linear(double wavelength, double flux, vec
             double inc_angle = get_inc_angle(
                 camera.pixel_centres_x[i], 
                 camera.pixel_centres_y[j], 
-                interferometer[1]
+                components[1]
             );
             double azim_angle = get_azim_angle(
                 camera.pixel_centres_x[i], 
                 camera.pixel_centres_y[j], 
-                interferometer[1]
+                components[1]
             );
-            double delay = interferometer[1]->get_delay(wavelength, inc_angle, azim_angle);
+            double delay = components[1]->get_delay(wavelength, inc_angle, azim_angle);
             (*image)[i + idx_col] = static_cast<unsigned short int>((flux / 4) * (1 + cos(delay)));
         }
     }
@@ -327,14 +331,14 @@ void Instrument::capture_single_delay_pixelated(double wavelength, double flux, 
             double inc_angle = get_inc_angle(
                 camera.pixel_centres_x[i], 
                 camera.pixel_centres_y[j], 
-                interferometer[1]
+                components[1]
             );
             double azim_angle = get_azim_angle(
                 camera.pixel_centres_x[i], 
                 camera.pixel_centres_y[j], 
-                interferometer[1]
+                components[1]
             );
-            double delay = interferometer[1]->get_delay(wavelength, inc_angle, azim_angle);
+            double delay = components[1]->get_delay(wavelength, inc_angle, azim_angle);
             double mask = camera.get_pixelated_phase_mask(
                 camera.pixel_centres_x[i],
                 camera.pixel_centres_y[j]

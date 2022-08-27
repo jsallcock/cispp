@@ -1,7 +1,7 @@
 CIS++: Modelling tools for Coherence Imaging Spectroscopy (CIS) of plasmas.
 
 
-WIP port of PyCIS to C++. Aiming to match functionality by end of Sept 2022.
+This project is a port of the Python library PyCIS to C++. I'm aiming to match functionality by end of Sept 2022. It is currently an untested work-in-progress.
 
 
 Requires:

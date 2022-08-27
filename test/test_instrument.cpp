@@ -13,10 +13,11 @@
 int main (int argc, char **argv)
 {
     auto fp_root = std::filesystem::absolute(std::filesystem::path(argv[0])).parent_path().parent_path();
-    std::string fp_config = (((fp_root / "test") / "config") / "single_delay_linear.yaml").string();
-    // std::string fp_config = (((fp_root / "test") / "config") / "single_delay_pixelated.yaml").string();
+    // std::string fp_config = (((fp_root / "test") / "config") / "single_delay_linear.yaml").string();
+    std::string fp_config = (((fp_root / "test") / "config") / "single_delay_pixelated.yaml").string();
 
     cispp::Instrument inst(fp_config);
+    std::cout << "inst.type : " << inst.type << std::endl;
     std::vector<unsigned short int> image(inst.camera.sensor_format_x * inst.camera.sensor_format_y);
 
     auto start = std::chrono::high_resolution_clock::now();

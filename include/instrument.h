@@ -30,9 +30,15 @@ class Instrument
     double lens_2_focal_length;
     double lens_3_focal_length;
     cispp::Camera camera;
-    vector<unique_ptr<cispp::Component>> interferometer;
+    vector<unique_ptr<cispp::Component>> components;
     string fp_config;
 
+
+    /**
+     * @brief Construct Instrument from .YAML config file
+     * 
+     * @param fp_config 
+     */
     Instrument(std::string fp_config);
 
     void write_config();

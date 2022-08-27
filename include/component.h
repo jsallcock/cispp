@@ -48,7 +48,7 @@ class Component
     virtual ~Component() = default;
 
     /**
-     * @brief Transmittance for light linearly polarised in alignment with component axis
+     * @brief Transmittance for light ray linearly polarised in alignment with component axis
      * 
      * @param wavelength wavelength of light (metres)
      * @param inc_angle incidence angle of light (radians)
@@ -59,11 +59,11 @@ class Component
 
 
     /**
-     * @brief Transmittance for light linearly polarised orthogonal to component axis
+     * @brief Transmittance for light ray linearly polarised orthogonal to component axis
      * 
-     * @param wavelength wavelength of light (metres)
-     * @param inc_angle incidence angle of light (radians)
-     * @param azim_angle azimuthal angle of light (radians)
+     * @param wavelength wavelength of light ray (metres)
+     * @param inc_angle incidence angle of light ray (radians)
+     * @param azim_angle azimuthal angle of light ray (radians)
      * @return double 
      */
     virtual double get_t2(double wavelength, double inc_angle, double azim_angle) = 0;
@@ -72,9 +72,9 @@ class Component
     /**
      * @brief Retardance in radians
      * 
-     * @param wavelength wavelength of light (metres)
-     * @param inc_angle incidence angle of light (radians)
-     * @param azim_angle azimuthal angle of light (radians)
+     * @param wavelength wavelength of light ray (metres)
+     * @param inc_angle incidence angle of light ray (radians)
+     * @param azim_angle azimuthal angle of light ray (radians)
      * @return double 
      */
     virtual double get_delay(double wavelength, double inc_angle, double azim_angle) = 0;
@@ -83,12 +83,21 @@ class Component
     /**
     * @brief Calculate Mueller matrix for light ray
     * 
-    * @param wavelength wavelength of light (metres)
-    * @param inc_angle incidence angle of light (radians)
-    * @param azim_angle azimuthal angle of light (radians) 
+    * @param wavelength wavelength of light ray (metres)
+    * @param inc_angle incidence angle of light ray (radians)
+    * @param azim_angle azimuthal angle of light ray (radians) 
     * @return Matrix4d 
     */
     virtual Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
+
+
+    virtual bool is_polariser();
+
+
+    virtual bool is_retarder();
+
+
+    virtual bool is_quarterwaveplate();
 };
 
 
@@ -122,6 +131,8 @@ class Polariser: public Component
     Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
 
     Eigen::Matrix4d get_mueller_matrix();
+
+    bool is_polariser() override;
 };
 
 
@@ -149,6 +160,8 @@ class Retarder: public Component
     double get_t2(double wavelength, double inc_angle, double azim_angle) override;
 
     Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
+
+    bool is_retarder() override;
 };
 
 
@@ -173,6 +186,8 @@ class QuarterWaveplate: public Retarder
     {}
 
     double get_delay(double wavelength, double inc_angle, double azim_angle) override;
+
+    bool is_quarterwaveplate() override;
 };
 
 
