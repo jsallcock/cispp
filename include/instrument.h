@@ -33,7 +33,6 @@ class Instrument
     vector<unique_ptr<cispp::Component>> components;
     string fp_config;
 
-
     /**
      * @brief Construct Instrument from .YAML config file
      * 
@@ -43,12 +42,35 @@ class Instrument
 
     void write_config();
 
+    /**
+     * @brief Incidence angle in radians of ray through interferometer component
+     * 
+     * @param x x position on sensor plane in metres
+     * @param y y position on sensor plane in metres
+     * @param component unique pointer to component
+     * @return double 
+     */
     double get_inc_angle(double x, double y, unique_ptr<cispp::Component>& component);
 
+    /**
+     * @brief Azimuthal angle in radians of ray through interfereometer component
+     * 
+     * @param x x position on sensor plane in metres
+     * @param y y position on sensor plane in metres
+     * @param component unique pointer to component
+     * @return double 
+     */
     double get_azim_angle(double x, double y, unique_ptr<cispp::Component>& component);
 
+    /**
+     * @brief Total Mueller matrix for instrument
+     * 
+     * @param x x position on sensor plane in metres
+     * @param y y position on sensor plane in metres
+     * @param wavelength wavelength of ray
+     * @return Eigen::Matrix4d 
+     */
     Eigen::Matrix4d get_mueller_matrix(double x, double y, double wavelength);
-
 
     /**
      * @brief save captured image to .PPM image file

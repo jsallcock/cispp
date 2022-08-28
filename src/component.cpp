@@ -47,36 +47,6 @@ Eigen::Matrix4d Component::get_mueller_matrix(double wavelength, double inc_angl
 }
 
 
-bool Component::is_polariser() {
-    return false;
-}
-
-
-bool Component::is_retarder() {
-    return false;
-}
-
-
-bool Component::is_quarterwaveplate() {
-    return false;
-}
-
-
-double Polariser::get_t1(double wavelength, double inc_angle, double azim_angle) {
-    return 1.;
-}
-
-
-double Polariser::get_t2(double wavelength, double inc_angle, double azim_angle) {
-    return 0.;
-}
-
-
-double Polariser::get_delay(double wavelength, double inc_angle, double azim_angle) {
-    return 0.;
-}
-
-
 Eigen::Matrix4d Polariser::get_mueller_matrix()
 {
     Eigen::Matrix4d m;
@@ -95,21 +65,6 @@ Eigen::Matrix4d Polariser::get_mueller_matrix(double wavelength, double inc_angl
 }
 
 
-bool Polariser::is_polariser() {
-    return true;
-}
-
-
-double Retarder::get_t1(double wavelength, double inc_angle, double azim_angle) {
-    return 1.;
-}
-
-
-double Retarder::get_t2(double wavelength, double inc_angle, double azim_angle) {
-    return 0.;
-}
-
-
 Eigen::Matrix4d Retarder::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
 {
     double delay = get_delay(wavelength, inc_angle, azim_angle);
@@ -124,26 +79,6 @@ Eigen::Matrix4d Retarder::get_mueller_matrix(double wavelength, double inc_angle
 
     Eigen::Matrix4d rot = get_rotation_matrix(orientation);
     return rot.transpose() * m * rot;
-}
-
-
-bool Retarder::is_retarder() {
-    return true;
-}
-
-
-double QuarterWaveplate::get_delay(double wavelength, double inc_angle, double azim_angle) {
-    return M_PI / 2;
-}
-
-
-bool QuarterWaveplate::is_quarterwaveplate() {
-    return true;
-}
-
-
-double HalfWaveplate::get_delay(double wavelength, double inc_angle, double azim_angle) {
-    return M_PI;
 }
 
 

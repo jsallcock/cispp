@@ -34,7 +34,7 @@ class Component
 
     Component()
     {}
-    
+
     Component(double orientation)
     : orientation(orientation)
     {}
@@ -57,7 +57,6 @@ class Component
      */
     virtual double get_t1(double wavelength, double inc_angle, double azim_angle) = 0;
 
-
     /**
      * @brief Transmittance for light ray linearly polarised orthogonal to component axis
      * 
@@ -67,7 +66,6 @@ class Component
      * @return double 
      */
     virtual double get_t2(double wavelength, double inc_angle, double azim_angle) = 0;
-
 
     /**
      * @brief Retardance in radians
@@ -79,7 +77,6 @@ class Component
      */
     virtual double get_delay(double wavelength, double inc_angle, double azim_angle) = 0;
 
-
     /**
     * @brief Calculate Mueller matrix for light ray
     * 
@@ -90,14 +87,17 @@ class Component
     */
     virtual Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
 
+    virtual bool is_polariser() {
+        return false;
+    }
 
-    virtual bool is_polariser();
+    virtual bool is_retarder() {
+        return false;
+    }
 
-
-    virtual bool is_retarder();
-
-
-    virtual bool is_quarterwaveplate();
+    virtual bool is_quarterwaveplate() {
+        return false;
+    }
 };
 
 
@@ -122,17 +122,25 @@ class Polariser: public Component
     : Component(orientation, tilt_x, tilt_y)
     {}
 
-    double get_t1(double wavelength, double inc_angle, double azim_angle) override;
+    double get_t1(double wavelength, double inc_angle, double azim_angle) override {
+        return 1;
+    }
 
-    double get_t2(double wavelength, double inc_angle, double azim_angle) override;
+    double get_t2(double wavelength, double inc_angle, double azim_angle) override {
+        return 0;
+    }
 
-    double get_delay(double wavelength, double inc_angle, double azim_angle) override;
+    double get_delay(double wavelength, double inc_angle, double azim_angle) override {
+        return 0;
+    }
 
     Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
 
     Eigen::Matrix4d get_mueller_matrix();
 
-    bool is_polariser() override;
+    bool is_polariser() override {
+        return true;
+    }
 };
 
 
@@ -155,13 +163,19 @@ class Retarder: public Component
     : Component(orientation, tilt_x, tilt_y)
     {}
 
-    double get_t1(double wavelength, double inc_angle, double azim_angle) override;
+    double get_t1(double wavelength, double inc_angle, double azim_angle) override {
+        return 1;
+    }
 
-    double get_t2(double wavelength, double inc_angle, double azim_angle) override;
+    double get_t2(double wavelength, double inc_angle, double azim_angle) override {
+        return 1;
+    }
 
     Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
 
-    bool is_retarder() override;
+    bool is_retarder() override {
+        return true;
+    }
 };
 
 
@@ -185,9 +199,13 @@ class QuarterWaveplate: public Retarder
     : Retarder(orientation, tilt_x, tilt_y)
     {}
 
-    double get_delay(double wavelength, double inc_angle, double azim_angle) override;
+    double get_delay(double wavelength, double inc_angle, double azim_angle) override {
+        return M_PI / 2;
+    }
 
-    bool is_quarterwaveplate() override;
+    bool is_quarterwaveplate() override {
+        return true;
+    }
 };
 
 
@@ -211,7 +229,9 @@ class HalfWaveplate: public Retarder
     : Retarder(orientation, tilt_x, tilt_y)
     {}
 
-    double get_delay(double wavelength, double inc_angle, double azim_angle) override;
+    double get_delay(double wavelength, double inc_angle, double azim_angle) override {
+        return M_PI;
+    }
 };
 
 

@@ -82,48 +82,22 @@ Instrument::Instrument(string fp_config)
 }
 
 
-
-
-/**
-* @brief Incidence angle in radians of ray through interferometer component
-* 
-* @param x x position on sensor plane in metres
-* @param y y position on sensor plane in metres
-* @param component unique pointer to component
-* @return double 
-*/
 double Instrument::get_inc_angle(double x, double y, unique_ptr<cispp::Component>& component)
 {
     double x0 = lens_3_focal_length * tan(component->tilt_x);
     double y0 = lens_3_focal_length * tan(component->tilt_y);
-    return atan2(sqrt(pow(x-x0,2) + pow(y-y0,2)), lens_3_focal_length);
+    return atan2(sqrt(pow(x - x0,2) + pow(y - y0,2)), lens_3_focal_length);
 }
 
 
-/**
-* @brief Azimuthal angle in radians of ray through interfereometer component
-* 
-* @param x x position on sensor plane in metres
-* @param y y position on sensor plane in metres
-* @param component unique pointer to component
-* @return double 
-*/
 double Instrument::get_azim_angle(double x, double y, unique_ptr<cispp::Component>& component)
 {
     double x0 = lens_3_focal_length * tan(component->tilt_x);
     double y0 = lens_3_focal_length * tan(component->tilt_y);
-    return atan2(y-y0, x-x0) + M_PI - (component->orientation);
+    return atan2(y - y0, x - x0) + M_PI - (component->orientation);
 }
 
 
-/**
-* @brief Total Mueller matrix for instrument
-* 
-* @param x x position on sensor plane in metres
-* @param y y position on sensor plane in metres
-* @param wavelength wavelength of ray
-* @return Eigen::Matrix4d 
-*/
 Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavelength)
 {
     Eigen::Matrix4d mtot;
@@ -270,18 +244,15 @@ void Instrument::capture_mueller(double wavelength, double flux, vector<unsigned
     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
     Eigen::Vector4d stokes_in;
     Eigen::Vector4d stokes_out;
-    stokes_in[0] = flux;
-    stokes_in[1] = 0;
-    stokes_in[2] = 0;
-    stokes_in[3] = 0;
-    for (size_t j = 0; j < camera.sensor_format_y; j++){
+    stokes_out << flux, 0, 0, 0;
+    for (size_t j = 0; j < camera.sensor_format_y; j++)
+    {
         size_t idx_col = j * camera.sensor_format_x;
-        for (size_t i = 0; i < camera.sensor_format_x; i++){
-            stokes_out = get_mueller_matrix(
-                camera.pixel_centres_x[i], 
-                camera.pixel_centres_y[j], 
-                wavelength
-            ) * stokes_in;
+        double y = camera.pixel_centres_y[j];
+        for (size_t i = 0; i < camera.sensor_format_x; i++)
+        {
+            double x = camera.pixel_centres_x[i];
+            stokes_out = get_mueller_matrix(x, y, wavelength) * stokes_in;
             (*image)[i + idx_col] = static_cast<unsigned short int>(stokes_out[0]);
         }
     }
@@ -297,19 +268,15 @@ void Instrument::capture_mueller(double wavelength, double flux, vector<unsigned
  */
 void Instrument::capture_single_delay_linear(double wavelength, double flux, vector<unsigned short int>* image)
 {
-    for (size_t j = 0; j < camera.sensor_format_y; j++) {
+    for (size_t j = 0; j < camera.sensor_format_y; j++) 
+    {
         size_t idx_col = j * camera.sensor_format_x;
-        for (size_t i = 0; i < camera.sensor_format_x; i++) {
-            double inc_angle = get_inc_angle(
-                camera.pixel_centres_x[i], 
-                camera.pixel_centres_y[j], 
-                components[1]
-            );
-            double azim_angle = get_azim_angle(
-                camera.pixel_centres_x[i], 
-                camera.pixel_centres_y[j], 
-                components[1]
-            );
+        double y = camera.pixel_centres_y[j];
+        for (size_t i = 0; i < camera.sensor_format_x; i++) 
+        {
+            double x = camera.pixel_centres_x[i];
+            double inc_angle = get_inc_angle(x, y, components[1]);
+            double azim_angle = get_azim_angle(x, y, components[1]);
             double delay = components[1]->get_delay(wavelength, inc_angle, azim_angle);
             (*image)[i + idx_col] = static_cast<unsigned short int>((flux / 4) * (1 + cos(delay)));
         }
@@ -325,24 +292,17 @@ void Instrument::capture_single_delay_linear(double wavelength, double flux, vec
  */
 void Instrument::capture_single_delay_pixelated(double wavelength, double flux, vector<unsigned short int>* image)
 {
-    for (size_t j = 0; j < camera.sensor_format_y; j++) {
+    for (size_t j = 0; j < camera.sensor_format_y; j++)
+    {
         size_t idx_col = j * camera.sensor_format_x;
-        for (size_t i = 0; i < camera.sensor_format_x; i++) {
-            double inc_angle = get_inc_angle(
-                camera.pixel_centres_x[i], 
-                camera.pixel_centres_y[j], 
-                components[1]
-            );
-            double azim_angle = get_azim_angle(
-                camera.pixel_centres_x[i], 
-                camera.pixel_centres_y[j], 
-                components[1]
-            );
+        double y = camera.pixel_centres_y[j];
+        for (size_t i = 0; i < camera.sensor_format_x; i++)
+        {
+            double x = camera.pixel_centres_x[i];
+            double inc_angle = get_inc_angle(x, y, components[1]);
+            double azim_angle = get_azim_angle(x, y, components[1]);
             double delay = components[1]->get_delay(wavelength, inc_angle, azim_angle);
-            double mask = camera.get_pixelated_phase_mask(
-                camera.pixel_centres_x[i],
-                camera.pixel_centres_y[j]
-            );
+            double mask = camera.get_pixelated_phase_mask(x, y);
             (*image)[i + idx_col] = static_cast<unsigned short int>((flux / 4) * (1 + cos(delay + mask)));
         }
     }
