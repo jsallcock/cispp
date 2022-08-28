@@ -78,7 +78,7 @@ class Instrument
      * @param fpath filepath (.PPM)
      * @param image pointer to image vector (row-major order)
      */
-    void image_to_file(string fpath, vector<unsigned short int>* image);
+    void save_image(string fpath, vector<unsigned short int>* image);
 
     void get_delay();
 

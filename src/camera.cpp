@@ -142,15 +142,15 @@ Eigen::Matrix4d cispp::Camera::get_mueller_matrix(double x, double y)
             return Polariser(0).get_mueller_matrix();
         }
         else {
-            return Polariser(135).get_mueller_matrix();
+            return Polariser(3 * M_PI / 4).get_mueller_matrix();
         }
     }
     else {
         if (iy % 2 == 0){
-            return Polariser(45).get_mueller_matrix();
+            return Polariser(M_PI / 4).get_mueller_matrix();
         }
         else {
-            return Polariser(90).get_mueller_matrix();
+            return Polariser(M_PI / 2).get_mueller_matrix();
         }
     }
 }

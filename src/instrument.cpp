@@ -120,14 +120,16 @@ Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavele
 }
 
 
-void Instrument::image_to_file(string fpath, vector<unsigned short int>* image)
+void Instrument::save_image(string fpath, vector<unsigned short int>* image)
 {
     std::ofstream file;
     file.open(fpath);
     file << "P3\n" << camera.sensor_format_x << " " << camera.sensor_format_y << "\n255\n";
-    for (size_t j = 0; j < camera.sensor_format_y; j++) {
+    for (size_t j = 0; j < camera.sensor_format_y; j++)
+    {
         size_t idx_col = j * camera.sensor_format_x;
-        for (size_t i = 0; i < camera.sensor_format_x; i++) {
+        for (size_t i = 0; i < camera.sensor_format_x; i++)
+        {
             unsigned short int counts = (*image)[i + idx_col];
             file << counts << ' ' << counts << ' ' << counts << '\n';
         }
@@ -167,7 +169,8 @@ bool Instrument::test_type_single_delay_linear()
         for (size_t i=1; i<n-1; i++)
         {
             if (components[i]->is_retarder() && 
-                test_align45(components[i], components[0])) {
+                test_align45(components[i], components[0])) 
+            {
                 rcount++;
             }
         }
@@ -244,7 +247,7 @@ void Instrument::capture_mueller(double wavelength, double flux, vector<unsigned
     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
     Eigen::Vector4d stokes_in;
     Eigen::Vector4d stokes_out;
-    stokes_out << flux, 0, 0, 0;
+    stokes_in << flux, 0, 0, 0;
     for (size_t j = 0; j < camera.sensor_format_y; j++)
     {
         size_t idx_col = j * camera.sensor_format_x;
