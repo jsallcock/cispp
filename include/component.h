@@ -269,6 +269,30 @@ class UniaxialCrystal: public Retarder
       cut_angle(cut_angle),
       material(get_material_properties(material_name))
     {}
+
+
+    /**
+     * @brief Constructor specifying material properties by MaterialProperties struct
+     * 
+     * @param orientation 
+     * @param thickness plate thickness (metres)
+     * @param cut_angle plate cut angle (radians)
+     * @param material_properties 
+     */
+    UniaxialCrystal
+    (
+        double orientation,
+        double tilt_x,
+        double tilt_y,
+        double thickness, 
+        double cut_angle,
+        MaterialProperties material_properties
+    )
+    : Retarder(orientation, tilt_x, tilt_y), 
+      thickness(thickness), 
+      cut_angle(cut_angle),
+      material(material_properties)
+    {}
     
     double get_delay(double wavelength, double inc_angle, double azim_angle) override;
 };

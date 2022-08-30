@@ -51,19 +51,38 @@ Instrument::Instrument(string fp_config)
             double cut_angle = nd_int[i]["UniaxialCrystal"]["cut_angle"].as<double>() * M_PI / 180;
             std::string material = nd_int[i]["UniaxialCrystal"]["material"].as<std::string>();
             
-            auto ptr = std::make_unique<cispp::UniaxialCrystal>(
-                orientation, 
-                tilt_x,
-                tilt_y,
-                thickness, 
-                cut_angle, 
-                material
-            );
-            components.push_back(std::move(ptr));   
+            if (nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"]) {
+                std::cout << "sellmeier coefficients found" << std::endl;
+                MaterialProperties mp = {};
+                mp.name = material;
 
-            // if (nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"]){
-            //     std::cout << "sellmeier coefficients found" << std::endl;
-            // }    
+                std::string alphabet = "ABCDEF";
+                for (int j=0; j<alphabet.size(); j++)
+                {
+                    std::string key(1, alphabet[i]);
+                    if (nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"][key + "e"])
+                    {
+                        double e = nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"][key + "e"].as<double>();
+                        double o = nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"][key + "o"].as<double>();
+                        mp.sellmeier_e.push_back(e);
+                        mp.sellmeier_o.push_back(o);
+                    }
+                }   
+            }  
+            else {
+                auto ptr = std::make_unique<cispp::UniaxialCrystal>(
+                    orientation, 
+                    tilt_x,
+                    tilt_y,
+                    thickness, 
+                    cut_angle, 
+                    material
+                );
+                components.push_back(std::move(ptr));   
+            }
+            
+
+              
         }
 
         else if (nd_int[i]["QuarterWaveplate"])

@@ -107,20 +107,29 @@ int main (int argc, char **argv)
 {
     auto fp_root = std::filesystem::absolute(std::filesystem::path(argv[0])).parent_path().parent_path();
 
-    if (test_single_delay_linear(fp_root)){
-        std::cout << "test_single_delay_linear: passed" << '\n';
-    }
-    else {
-        std::cout << "test_single_delay_linear: failed" << '\n';
-    };
+    // if (test_single_delay_linear(fp_root)){
+    //     std::cout << "test_single_delay_linear: passed" << '\n';
+    // }
+    // else {
+    //     std::cout << "test_single_delay_linear: failed" << '\n';
+    // };
 
-     if (test_single_delay_pixelated(fp_root)){
-        std::cout << "test_single_delay_pixelated: passed" << '\n';
-    }
-    else {
-        std::cout << "test_single_delay_pixelated: failed" << '\n';
-    };
+    //  if (test_single_delay_pixelated(fp_root)){
+    //     std::cout << "test_single_delay_pixelated: passed" << '\n';
+    // }
+    // else {
+    //     std::cout << "test_single_delay_pixelated: failed" << '\n';
+    // };
 
+    std::string fp_config = (((fp_root / "test") / "config") / "single_delay_pixelated.yaml").string();
+    cispp::Instrument inst(fp_config);
+
+    double wavelength = 465e-9;
+    double flux = 500;
+
+    std::vector<unsigned short int> image(inst.camera.sensor_format_x * inst.camera.sensor_format_y);
+    inst.capture(wavelength, flux, &image);
+    inst.save_image("test.ppm", &image);
 
     return 0;
 }
