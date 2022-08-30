@@ -143,15 +143,17 @@ void Instrument::save_image(string fpath, vector<unsigned short int>* image)
 {
     std::ofstream file;
     file.open(fpath);
-    file << "P3\n" << camera.sensor_format_x << " " << camera.sensor_format_y << "\n255\n";
+    file << "P2\n" << camera.sensor_format_x << " " << camera.sensor_format_y << "\n255\n";
     for (size_t j = 0; j < camera.sensor_format_y; j++)
     {
         size_t idx_col = j * camera.sensor_format_x;
-        for (size_t i = 0; i < camera.sensor_format_x; i++)
+        for (size_t i = 0; i < camera.sensor_format_x - 1; i++)
         {
             unsigned short int counts = (*image)[i + idx_col];
-            file << counts << ' ' << counts << ' ' << counts << '\n';
+            file << counts << ' ';
         }
+        unsigned short int counts = (*image)[camera.sensor_format_x - 1 + idx_col];
+        file << counts << '\n';
     }
     file.close();
 }

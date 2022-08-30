@@ -73,7 +73,7 @@ class Instrument
     Eigen::Matrix4d get_mueller_matrix(double x, double y, double wavelength);
 
     /**
-     * @brief save captured image to .PPM image file
+     * @brief save captured image to .PGM (portable GrayMap) file
      * 
      * @param fpath filepath (.PPM)
      * @param image pointer to image vector (row-major order)
