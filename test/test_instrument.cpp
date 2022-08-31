@@ -19,37 +19,39 @@
  */
 bool test_single_delay_linear(std::filesystem::path fp_root)
 {
-    std::string fp_config = (((fp_root / "test") / "config") / "single_delay_linear.yaml").string();
+    std::string fp_config = (((fp_root / "test") / "config") / "single_delay_linear.yaml");
 
-    cispp::Instrument inst(fp_config);
-    cispp::Instrument inst_mueller(fp_config);
-    inst_mueller.type = "mueller";
+    auto inst = cispp::load_instrument(fp_config);
+    auto inst_m = cispp::load_instrument(fp_config, true); // force_mueller
+    std::cout << "inst->type = " << inst->type << std::endl;
+    std::cout << "inst_m->type = " << inst_m->type << std::endl;
+
     double wavelength = 465e-9;
     double flux = 500;
 
-    std::vector<unsigned short int> image(inst.camera.sensor_format_x * inst.camera.sensor_format_y);
-    std::vector<unsigned short int> image_mueller(inst.camera.sensor_format_x * inst.camera.sensor_format_y);
+    std::vector<unsigned short int> image(inst->camera.sensor_format_x * inst->camera.sensor_format_y);
+    std::vector<unsigned short int> image_m(inst->camera.sensor_format_x * inst->camera.sensor_format_y);
 
     auto start = std::chrono::high_resolution_clock::now();
-    inst.capture(wavelength, flux, &image);
+    inst->capture(wavelength, flux, &image);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     std::cout << "single_delay_linear: duration = " << duration.count() * 1e-6 << " s" << std::endl;
-    inst.save_image("single_delay_linear.pbm", &image);
+    inst->save_image("single_delay_linear.pbm", &image);
 
     start = std::chrono::high_resolution_clock::now();
-    inst_mueller.capture(wavelength, flux, &image_mueller);
+    inst_m->capture(wavelength, flux, &image_m);
     stop = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     std::cout << "mueller: duration = " << duration.count() * 1e-6 << " s" << std::endl;
-    inst_mueller.save_image("single_delay_linear_mueller.pbm", &image_mueller);
+    inst_m->save_image("single_delay_linear_mueller.pbm", &image_m);
 
-    for (size_t j = 0; j < inst.camera.sensor_format_y; j++)
+    for (size_t j = 0; j < inst->camera.sensor_format_y; j++)
     {
-        size_t idx_col = j * inst.camera.sensor_format_x;
-        for (size_t i = 0; i < inst.camera.sensor_format_x; i++)
+        size_t idx_col = j * inst->camera.sensor_format_x;
+        for (size_t i = 0; i < inst->camera.sensor_format_x; i++)
         {
-            if (image[i + idx_col] != image_mueller[i + idx_col])
+            if (image[i + idx_col] != image_m[i + idx_col])
             {
                 return false;
             }
@@ -62,37 +64,39 @@ bool test_single_delay_linear(std::filesystem::path fp_root)
 
 bool test_single_delay_pixelated(std::filesystem::path fp_root)
 {
-    std::string fp_config = (((fp_root / "test") / "config") / "single_delay_pixelated.yaml").string();
+    std::string fp_config = (((fp_root / "test") / "config") / "single_delay_pixelated.yaml");
 
-    cispp::Instrument inst(fp_config);
-    cispp::Instrument inst_mueller(fp_config);
-    inst_mueller.type = "mueller";
+    auto inst = cispp::load_instrument(fp_config);
+    auto inst_m = cispp::load_instrument(fp_config, true); // force_mueller
+    std::cout << "inst->type = " << inst->type << std::endl;
+    std::cout << "inst_m->type = " << inst_m->type << std::endl;
+
     double wavelength = 465e-9;
     double flux = 500;
 
-    std::vector<unsigned short int> image(inst.camera.sensor_format_x * inst.camera.sensor_format_y);
-    std::vector<unsigned short int> image_mueller(inst.camera.sensor_format_x * inst.camera.sensor_format_y);
+    std::vector<unsigned short int> image(inst->camera.sensor_format_x * inst->camera.sensor_format_y);
+    std::vector<unsigned short int> image_m(inst->camera.sensor_format_x * inst->camera.sensor_format_y);
 
     auto start = std::chrono::high_resolution_clock::now();
-    inst.capture(wavelength, flux, &image);
+    inst->capture(wavelength, flux, &image);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     std::cout << "single_delay_pixelated: duration = " << duration.count() * 1e-6 << " s" << std::endl;
-    inst.save_image("single_delay_pixelated.pbm", &image);
+    inst->save_image("single_delay_pixelated.pbm", &image);
 
     start = std::chrono::high_resolution_clock::now();
-    inst_mueller.capture(wavelength, flux, &image_mueller);
+    inst_m->capture(wavelength, flux, &image_m);
     stop = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     std::cout << "mueller: duration = " << duration.count() * 1e-6 << " s" << std::endl;
-    inst_mueller.save_image("single_delay_pixelated_mueller.pbm", &image_mueller);
+    inst_m->save_image("single_delay_pixelated_mueller.pbm", &image_m);
 
-    for (size_t j = 0; j < inst.camera.sensor_format_y; j++)
+    for (size_t j = 0; j < inst->camera.sensor_format_y; j++)
     {
-        size_t idx_col = j * inst.camera.sensor_format_x;
-        for (size_t i = 0; i < inst.camera.sensor_format_x; i++)
+        size_t idx_col = j * inst->camera.sensor_format_x;
+        for (size_t i = 0; i < inst->camera.sensor_format_x; i++)
         {
-            if (image[i + idx_col] != image_mueller[i + idx_col])
+            if (image[i + idx_col] != image_m[i + idx_col])
             {
                 return false;
             }
@@ -114,7 +118,7 @@ int main (int argc, char **argv)
         std::cout << "test_single_delay_linear: failed" << '\n';
     };
 
-     if (test_single_delay_pixelated(fp_root)){
+    if (test_single_delay_pixelated(fp_root)){
         std::cout << "test_single_delay_pixelated: passed" << '\n';
     }
     else {

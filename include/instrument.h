@@ -22,7 +22,6 @@ namespace cispp {
 
 class Instrument
 {
-
     public:
    
     string type = "mueller";
@@ -38,7 +37,13 @@ class Instrument
      * 
      * @param fp_config 
      */
-    Instrument(std::string fp_config);
+    Instrument(std::filesystem::path fp_config);
+
+    virtual ~Instrument() = default;
+
+    static cispp::Camera parse_node_camera(YAML::Node nd_camera);
+
+    static void parse_node_components(YAML::Node nd_components, vector<unique_ptr<cispp::Component>>& components);
 
     void write_config();
 
@@ -82,28 +87,56 @@ class Instrument
 
     void get_delay();
 
-
     /**
-     * @brief Determine instrument type based on configuraiton
+     * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light (Mueller model)
      * 
-     * @return std::string 
+     * @param wavelength wavelength of light in metres
+     * @param flux photon flux
+     * @param image pointer to image vector (row-major order)
      */
-    std::string get_type();
-
-    bool test_type_single_delay_linear();
-
-    bool test_type_single_delay_pixelated();
-
-    // ca
-
-    void capture(double wavelength, double flux, vector<unsigned short int>* image);
-
-    void capture_mueller(double wavelength, double flux, vector<unsigned short int>* image);
-
-    void capture_single_delay_linear(double wavelength, double flux, vector<unsigned short int>* image);
-
-    void capture_single_delay_pixelated(double wavelength, double flux, vector<unsigned short int>* image);
+    virtual void capture(double wavelength, double flux, vector<unsigned short int>* image);
 };
+
+
+class Instrument1DL: public Instrument
+{
+    public:
+
+    Instrument1DL(std::filesystem::path fp_config)
+    : Instrument(fp_config)
+    {
+        type = "single_delay_linear";
+    }
+
+    static bool test_type(const YAML::Node node);
+
+    void capture(double wavelength, double flux, vector<unsigned short int>* image) override;
+};
+
+
+class Instrument1DP: public Instrument
+{
+    public:
+
+    Instrument1DP(std::filesystem::path fp_config)
+    : Instrument(fp_config)
+    {
+        type = "single_delay_pixelated";
+    }
+
+    static bool test_type(const YAML::Node node);
+
+    void capture(double wavelength, double flux, vector<unsigned short int>* image) override;
+};
+
+/**
+ * @brief factory method for loading a CIS instrument
+ * 
+ * @param fp_config 
+ * @param force_mueller 
+ * @return Instrument 
+ */
+unique_ptr<cispp::Instrument> load_instrument(std::filesystem::path fp_config, bool force_mueller=false);
 
 
 } // namespace cispp

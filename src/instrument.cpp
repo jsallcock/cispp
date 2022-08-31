@@ -10,49 +10,61 @@ using std::string;
 namespace cispp {
 
 
-Instrument::Instrument(string fp_config)
+Instrument::Instrument(std::filesystem::path fp_config)
 : fp_config(fp_config)
 {
     YAML::Node nd_config = YAML::LoadFile(fp_config);
-    YAML::Node nd_cam = nd_config["camera"];
-    YAML::Node nd_int = nd_config["interferometer"];
+    YAML::Node nd_camera = nd_config["camera"];
+    YAML::Node nd_components = nd_config["interferometer"];
 
     lens_1_focal_length = nd_config["lens_1_focal_length"].as<double>();
     lens_2_focal_length = nd_config["lens_2_focal_length"].as<double>();
     lens_3_focal_length = nd_config["lens_3_focal_length"].as<double>();
 
-    camera = cispp::Camera(
-        nd_cam["sensor_format"][0].as<int>(),  // sensor_format_x
-        nd_cam["sensor_format"][1].as<int>(),  // sensor_format_y
-        nd_cam["pixel_size"].as<double>(),
-        nd_cam["bit_depth"].as<int>(),
-        nd_cam["qe"].as<double>(),
-        nd_cam["epercount"].as<double>(),
-        nd_cam["cam_noise"].as<double>(),
-        nd_cam["type"].as<string>()
-    );
+    camera = parse_node_camera(nd_camera);
+    parse_node_components(nd_components, components);
+}
 
-    // loop over interferometer components
-    for (size_t i = 0; i < nd_int.size(); i++)
+
+cispp::Camera Instrument::parse_node_camera(YAML::Node nd_camera)
+{
+    cispp::Camera cam(
+        nd_camera["sensor_format"][0].as<int>(),  // sensor_format_x
+        nd_camera["sensor_format"][1].as<int>(),  // sensor_format_y
+        nd_camera["pixel_size"].as<double>(),
+        nd_camera["bit_depth"].as<int>(),
+        nd_camera["qe"].as<double>(),
+        nd_camera["epercount"].as<double>(),
+        nd_camera["cam_noise"].as<double>(),
+        nd_camera["type"].as<string>("monochrome")
+    );
+    return cam;
+}
+
+void Instrument::parse_node_components(YAML::Node nd_components, vector<unique_ptr<cispp::Component>>& components)
+{
+    for (size_t i = 0; i < nd_components.size(); i++)
     {
-        if (nd_int[i]["LinearPolariser"])
+        YAML::Node nd_comp = nd_components[i];
+        if (nd_comp["LinearPolariser"])
         {
-            double orientation = nd_int[i]["LinearPolariser"]["orientation"].as<double>(0) * M_PI / 180;
+            YAML::Node node = nd_comp["LinearPolariser"];
+            double orientation = node["orientation"].as<double>(0) * M_PI / 180;
             auto ptr = std::make_unique<cispp::Polariser>(orientation);
             components.push_back(std::move(ptr));
         }
 
-        else if (nd_int[i]["UniaxialCrystal"])
+        else if (nd_comp["UniaxialCrystal"])
         {
-            double orientation = nd_int[i]["UniaxialCrystal"]["orientation"].as<double>() * M_PI / 180;
-            double tilt_x = nd_int[i]["UniaxialCrystal"]["tilt_x"].as<double>(0);
-            double tilt_y = nd_int[i]["UniaxialCrystal"]["tilt_y"].as<double>(0);
-            double thickness = nd_int[i]["UniaxialCrystal"]["thickness"].as<double>();
-            double cut_angle = nd_int[i]["UniaxialCrystal"]["cut_angle"].as<double>() * M_PI / 180;
-            std::string material = nd_int[i]["UniaxialCrystal"]["material"].as<std::string>();
+            YAML::Node node = nd_comp["UniaxialCrystal"];
+            double orientation = node["orientation"].as<double>() * M_PI / 180;
+            double tilt_x = node["tilt_x"].as<double>(0);
+            double tilt_y = node["tilt_y"].as<double>(0);
+            double thickness = node["thickness"].as<double>();
+            double cut_angle = node["cut_angle"].as<double>() * M_PI / 180;
+            std::string material = node["material"].as<std::string>();
             
-            if (nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"]) {
-                std::cout << "sellmeier coefficients found" << std::endl;
+            if (node["sellmeier_coefs"]) {
                 MaterialProperties mp = {};
                 mp.name = material;
 
@@ -60,10 +72,10 @@ Instrument::Instrument(string fp_config)
                 for (int j=0; j<alphabet.size(); j++)
                 {
                     std::string key(1, alphabet[i]);
-                    if (nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"][key + "e"])
+                    if (node["sellmeier_coefs"][key + "e"])
                     {
-                        double e = nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"][key + "e"].as<double>();
-                        double o = nd_int[i]["UniaxialCrystal"]["sellmeier_coefs"][key + "o"].as<double>();
+                        double e = node["sellmeier_coefs"][key + "e"].as<double>();
+                        double o = node["sellmeier_coefs"][key + "o"].as<double>();
                         mp.sellmeier_e.push_back(e);
                         mp.sellmeier_o.push_back(o);
                     }
@@ -79,15 +91,13 @@ Instrument::Instrument(string fp_config)
                     material
                 );
                 components.push_back(std::move(ptr));   
-            }
-            
-
-              
+            }       
         }
 
-        else if (nd_int[i]["QuarterWaveplate"])
+        else if (nd_comp["QuarterWaveplate"])
         {
-            double orientation = nd_int[i]["QuarterWaveplate"]["orientation"].as<double>(0) * M_PI / 180;
+            YAML::Node node = nd_comp["QuarterWaveplate"];
+            double orientation = node["orientation"].as<double>(0) * M_PI / 180;
             auto ptr = std::make_unique<cispp::QuarterWaveplate>(orientation);
             components.push_back(std::move(ptr));
         }
@@ -96,8 +106,6 @@ Instrument::Instrument(string fp_config)
             throw std::logic_error("Interferometer component was not understood.");
         }
     }
-
-    type = get_type();
 }
 
 
@@ -159,112 +167,9 @@ void Instrument::save_image(string fpath, vector<unsigned short int>* image)
 }
 
 
- std::string Instrument::get_type()
- {
-    if (test_type_single_delay_linear()) {
-        return "single_delay_linear";
-    }
-    else if (test_type_single_delay_pixelated()) {
-        return "single_delay_pixelated";
-    }
-    else return "mueller";
- }
-
-
-/**
- * @brief test if instrument configuration matches "single_delay_linear" type
- * 
- * @return true 
- * @return false 
- */
-bool Instrument::test_type_single_delay_linear()
-{
-    size_t n = components.size();
-    if (n > 2 &&
-        camera.type == "monochrome" &&
-        components[0]->is_polariser() && 
-        components[n-1]->is_polariser() &&
-        test_align90(components[0], components[n-1]))
-    {
-        size_t rcount = 0;
-        for (size_t i=1; i<n-1; i++)
-        {
-            if (components[i]->is_retarder() && 
-                test_align45(components[i], components[0])) 
-            {
-                rcount++;
-            }
-        }
-        if (rcount == n-2) {
-            return true;
-        }
-    }
-    return false;
-}
-
-
-/**
- * @brief test if instrument configuration matches "single_delay_pixelated" type
- * 
- * @return true 
- * @return false 
- */
-bool Instrument::test_type_single_delay_pixelated()
-{
-    size_t n = components.size();
-    if (n > 2 &&
-        camera.type == "monochrome_polarised" &&
-        components[0]->is_polariser() && 
-        components[n-1]->is_quarterwaveplate() &&
-        test_align90(components[0], components[n-1]))
-    {
-        size_t rcount = 0;
-        for (size_t i=1; i<n-1; i++)
-        {
-            if (components[i]->is_retarder() && 
-                test_align45(components[i], components[0])) {
-                rcount++;
-            }
-        }
-        if (rcount == n-2) {
-            return true;
-        }
-    }
-    return false;
-}
-
-
-/**
- * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light (general)
- * 
- * This is really an approximation: perfectly monochromatic, unpolarised light is impossible!
- * @param wavelength wavelength of light in metres
- * @param flux photon flux
- * @param image pointer to image vector (row-major order)
- */
 void Instrument::capture(double wavelength, double flux, vector<unsigned short int>* image)
 {
-    if (type == "single_delay_linear") {
-        capture_single_delay_linear(wavelength, flux, image);
-    }
-    else if (type == "single_delay_pixelated") {
-        capture_single_delay_pixelated(wavelength, flux, image);
-    }
-    else {
-        capture_mueller(wavelength, flux, image);
-    }
-}
-
-
-/**
- * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light (Mueller model)
- * 
- * @param wavelength wavelength of light in metres
- * @param flux photon flux
- * @param image pointer to image vector (row-major order)
- */
-void Instrument::capture_mueller(double wavelength, double flux, vector<unsigned short int>* image)
-{
+    std::cout << "capture: mueller" << std::endl;
     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
     Eigen::Vector4d stokes_in;
     Eigen::Vector4d stokes_out;
@@ -283,14 +188,37 @@ void Instrument::capture_mueller(double wavelength, double flux, vector<unsigned
 }
 
 
-/**
- * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light (single_delay_linear)
- * 
- * @param wavelength wavelength of light in metres
- * @param flux photon flux
- * @param image pointer to image vector (row-major order)
- */
-void Instrument::capture_single_delay_linear(double wavelength, double flux, vector<unsigned short int>* image)
+bool Instrument1DL::test_type(const YAML::Node node)
+{
+    vector<unique_ptr<cispp::Component>> components_test;
+    Instrument::parse_node_components(node["interferometer"], components_test);
+    cispp::Camera cam = parse_node_camera(node["camera"]);
+
+    size_t n = components_test.size();
+    if (n > 2 &&
+        cam.type == "monochrome" &&
+        components_test[0]->is_polariser() && 
+        components_test[n-1]->is_polariser() &&
+        test_align90(components_test[0], components_test[n-1]))
+    {
+        size_t rcount = 0;
+        for (size_t i=1; i<n-1; i++)
+        {
+            if (components_test[i]->is_retarder() && 
+                test_align45(components_test[i], components_test[0])) 
+            {
+                rcount++;
+            }
+        }
+        if (rcount == n-2) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+void Instrument1DL::capture(double wavelength, double flux, vector<unsigned short int>* image)
 {
     for (size_t j = 0; j < camera.sensor_format_y; j++) 
     {
@@ -307,14 +235,37 @@ void Instrument::capture_single_delay_linear(double wavelength, double flux, vec
     }
 }
 
-/**
- * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light (single_delay_pixelated)
- * 
- * @param wavelength wavelength of light in metres
- * @param flux photon flux
- * @param image pointer to image vector (row-major order)
- */
-void Instrument::capture_single_delay_pixelated(double wavelength, double flux, vector<unsigned short int>* image)
+
+bool Instrument1DP::test_type(const YAML::Node node)
+{
+    vector<unique_ptr<cispp::Component>> components_test;
+    Instrument::parse_node_components(node["interferometer"], components_test);
+    cispp::Camera cam = parse_node_camera(node["camera"]);
+
+    size_t n = components_test.size();
+    if (n > 2 &&
+        cam.type == "monochrome_polarised" &&
+        components_test[0]->is_polariser() && 
+        components_test[n-1]->is_quarterwaveplate() &&
+        test_align90(components_test[0], components_test[n-1]))
+    {
+        size_t rcount = 0;
+        for (size_t i=1; i<n-1; i++)
+        {
+            if (components_test[i]->is_retarder() && 
+                test_align45(components_test[i], components_test[0])) {
+                rcount++;
+            }
+        }
+        if (rcount == n-2) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+void Instrument1DP::capture(double wavelength, double flux, vector<unsigned short int>* image)
 {
     for (size_t j = 0; j < camera.sensor_format_y; j++)
     {
@@ -329,6 +280,24 @@ void Instrument::capture_single_delay_pixelated(double wavelength, double flux, 
             double mask = camera.get_pixelated_phase_mask(x, y);
             (*image)[i + idx_col] = static_cast<unsigned short int>((flux / 4) * (1 + cos(delay + mask)));
         }
+    }
+}
+
+
+unique_ptr<cispp::Instrument> load_instrument(std::filesystem::path fp_config, bool force_mueller)
+{
+    const YAML::Node node = YAML::LoadFile(fp_config);
+
+    if (!force_mueller && Instrument1DL::test_type(node)) {
+        return std::make_unique<cispp::Instrument1DL>(fp_config);
+    }
+
+    else if (!force_mueller && Instrument1DP::test_type(node)) {
+        return std::make_unique<cispp::Instrument1DP>(fp_config);
+    }
+
+    else {
+        return std::make_unique<cispp::Instrument>(fp_config);
     }
 }
 
