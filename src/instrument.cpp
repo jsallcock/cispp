@@ -113,7 +113,7 @@ double Instrument::get_inc_angle(double x, double y, unique_ptr<cispp::Component
 {
     double x0 = lens_3_focal_length * tan(component->tilt_x);
     double y0 = lens_3_focal_length * tan(component->tilt_y);
-    return atan2(sqrt(pow(x - x0,2) + pow(y - y0,2)), lens_3_focal_length);
+    return atan2(sqrt(pow(x - x0, 2) + pow(y - y0, 2)), lens_3_focal_length);
 }
 
 
@@ -169,7 +169,6 @@ void Instrument::save_image(string fpath, vector<unsigned short int>* image)
 
 void Instrument::capture(double wavelength, double flux, vector<unsigned short int>* image)
 {
-    std::cout << "capture: mueller" << std::endl;
     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
     Eigen::Vector4d stokes_in;
     Eigen::Vector4d stokes_out;
@@ -186,6 +185,26 @@ void Instrument::capture(double wavelength, double flux, vector<unsigned short i
         }
     }
 }
+
+
+// void Instrument::capture(vector<double> wavelength, vector<double> spectral_flux, vector<unsigned short int>* image)
+// {
+//     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
+//     Eigen::Vector4d stokes_in;
+//     Eigen::Vector4d stokes_out;
+//     stokes_in << flux, 0, 0, 0;
+//     for (size_t j = 0; j < camera.sensor_format_y; j++)
+//     {
+//         size_t idx_col = j * camera.sensor_format_x;
+//         double y = camera.pixel_centres_y[j];
+//         for (size_t i = 0; i < camera.sensor_format_x; i++)
+//         {
+//             double x = camera.pixel_centres_x[i];
+//             stokes_out = get_mueller_matrix(x, y, wavelength) * stokes_in;
+//             (*image)[i + idx_col] = static_cast<unsigned short int>(stokes_out[0]);
+//         }
+//     }
+// }
 
 
 bool Instrument1DL::test_type(const YAML::Node node)

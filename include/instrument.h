@@ -95,6 +95,8 @@ class Instrument
      * @param image pointer to image vector (row-major order)
      */
     virtual void capture(double wavelength, double flux, vector<unsigned short int>* image);
+
+    // virtual void capture(vector<double> wavelength, vector<double> spectral_flux, vector<unsigned short int>* image);
 };
 
 

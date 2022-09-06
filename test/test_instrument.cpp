@@ -22,7 +22,7 @@ bool test_single_delay_linear(std::filesystem::path fp_root)
     std::string fp_config = (((fp_root / "test") / "config") / "single_delay_linear.yaml");
 
     auto inst = cispp::load_instrument(fp_config);
-    auto inst_m = cispp::load_instrument(fp_config, true); // force_mueller
+    auto inst_m = cispp::load_instrument(fp_config, true);  // force_mueller
     std::cout << "inst->type = " << inst->type << std::endl;
     std::cout << "inst_m->type = " << inst_m->type << std::endl;
 
@@ -67,7 +67,7 @@ bool test_single_delay_pixelated(std::filesystem::path fp_root)
     std::string fp_config = (((fp_root / "test") / "config") / "single_delay_pixelated.yaml");
 
     auto inst = cispp::load_instrument(fp_config);
-    auto inst_m = cispp::load_instrument(fp_config, true); // force_mueller
+    auto inst_m = cispp::load_instrument(fp_config, true);  // force_mueller
     std::cout << "inst->type = " << inst->type << std::endl;
     std::cout << "inst_m->type = " << inst_m->type << std::endl;
 
