@@ -187,24 +187,25 @@ void Instrument::capture(double wavelength, double flux, vector<unsigned short i
 }
 
 
-// void Instrument::capture(vector<double> wavelength, vector<double> spectral_flux, vector<unsigned short int>* image)
-// {
-//     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
-//     Eigen::Vector4d stokes_in;
-//     Eigen::Vector4d stokes_out;
-//     stokes_in << flux, 0, 0, 0;
-//     for (size_t j = 0; j < camera.sensor_format_y; j++)
-//     {
-//         size_t idx_col = j * camera.sensor_format_x;
-//         double y = camera.pixel_centres_y[j];
-//         for (size_t i = 0; i < camera.sensor_format_x; i++)
-//         {
-//             double x = camera.pixel_centres_x[i];
-//             stokes_out = get_mueller_matrix(x, y, wavelength) * stokes_in;
-//             (*image)[i + idx_col] = static_cast<unsigned short int>(stokes_out[0]);
-//         }
-//     }
-// }
+void Instrument::capture(vector<double> wavelength, vector<double> spectral_flux, vector<unsigned short int>* image)
+{
+    assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
+    Eigen::Vector4d stokes_in;
+    Eigen::Vector4d stokes_out;
+    stokes_in << flux, 0, 0, 0;
+    
+    for (size_t j = 0; j < camera.sensor_format_y; j++)
+    {
+        size_t idx_col = j * camera.sensor_format_x;
+        double y = camera.pixel_centres_y[j];
+        for (size_t i = 0; i < camera.sensor_format_x; i++)
+        {
+            double x = camera.pixel_centres_x[i];
+            stokes_out = get_mueller_matrix(x, y, wavelength) * stokes_in;
+            (*image)[i + idx_col] = static_cast<unsigned short int>(stokes_out[0]);
+        }
+    }
+}
 
 
 bool Instrument1DL::test_type(const YAML::Node node)
