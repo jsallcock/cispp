@@ -2,3 +2,6 @@
 *.vscode
 build/*
 !readme.md
+*.pbm
+*.png
+*.tiff

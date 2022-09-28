@@ -1,5 +1,7 @@
-#include <math>
+#include <cmath>
 #include <vector>
+#include <iostream>
+
 
 namespace cispp {
 
@@ -11,7 +13,7 @@ namespace cispp {
  * @param y 
  * @return double 
  */
-double trapz(std::vector x, std::vector y);
+double trapz(std::vector<double> x, std::vector<double> y);
 
 
 } // namespace cispp

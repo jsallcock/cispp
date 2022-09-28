@@ -177,7 +177,7 @@ class Retarder: public Component
         return true;
     }
 
-    void get_fringe_frequency(double )
+    // void get_fringe_frequency(double );
 };
 
 

@@ -5,7 +5,19 @@ CXXFLAGS+=-I.
 CXXFLAGS+=-mmacosx-version-min=12.5
 
 
-all: build/test_material build/test_component build/test_camera build/test_instrument
+all: build/test_math build/test_material build/test_component build/test_camera build/test_instrument
+
+
+# MATH
+build/test_math: build/test_math.o build/math.o
+	$(CXX) $(CXXFLAGS) build/test_math.o build/math.o -o build/test_math
+
+build/test_math.o: test/test_math.cpp include/math.h
+	$(CXX) $(CXXFLAGS) -c test/test_math.cpp -o build/test_math.o
+
+build/math.o: src/math.cpp include/math.h
+	$(CXX) $(CXXFLAGS) -c src/math.cpp -o build/math.o
+
 
 
 # MATERIAL
