@@ -89,20 +89,66 @@ class Camera
       pixel_lbounds_y(get_pixel_lbounds_y())
     {}
 
+    /**
+     * @brief Get x-position of pixel centres in metres
+     * 
+     * @return std::vector<double> 
+     */
     std::vector<double> get_pixel_centres_x() const;
 
-    std::vector<double> get_pixel_centres_y() const;
-
+    /**
+     * @brief Get x-position of pixel lower bounds in metres
+     * 
+     * @return std::vector<double> 
+     */
     std::vector<double> get_pixel_lbounds_x() const;
 
+    /**
+     * @brief Get y-position of pixel centres in metres
+     * 
+     * @return std::vector<double> 
+     */
+    std::vector<double> get_pixel_centres_y() const;
+
+    /**
+     * @brief Get y-position of pixel lower bounds in metres
+     * 
+     * @return std::vector<double> 
+     */
     std::vector<double> get_pixel_lbounds_y() const;
 
+    /**
+     * @brief Get x-index of pixel by x-position in metres
+     * 
+     * @param x 
+     * @return size_t 
+     */
     size_t get_pixel_idx_x(double x);
 
+    /**
+     * @brief Get y-index of pixel by y-position in metres
+     * 
+     * @param y 
+     * @return size_t 
+     */
     size_t get_pixel_idx_y(double y);
 
+    /**
+     * @brief Get pixelated phase mask value by xy-position in metres
+     * 
+     * @param x x-pixel index
+     * @param y y-pixel index
+     * @return double 
+     */
     double get_pixelated_phase_mask(double x, double y);
 
+    /**
+     * @brief Get mueller matrix by xy-position in metres
+     * 
+     * @param x x-pixel index
+     * @param y y-pixel index
+     * @return Eigen::Matrix4d 
+     */
     Eigen::Matrix4d get_mueller_matrix(double x, double y);
 };
 

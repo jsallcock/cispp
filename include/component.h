@@ -176,6 +176,8 @@ class Retarder: public Component
     bool is_retarder() override {
         return true;
     }
+
+    void get_fringe_frequency(double )
 };
 
 
@@ -304,7 +306,7 @@ class UniaxialCrystal: public Retarder
  */
 class SavartPlate: public Retarder
 {
-
+    double get_delay(double wavelength, double inc_angle, double azim_angle) override;
 };
 
 
