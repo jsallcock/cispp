@@ -9,11 +9,7 @@
 namespace cispp {
 
 
-/**
- * @brief get default material properties by material name
- * 
- * @return MaterialProperties 
- */
+
 MaterialProperties get_material_properties(std::string material_name)
 {
     MaterialProperties mp = {};
@@ -41,13 +37,13 @@ MaterialProperties get_material_properties(std::string material_name)
 
 std::pair<double, double> get_refractive_indices(double wavelength, MaterialProperties &mp)
 {
-    size_t nc_e = mp.sellmeier_e.size();
-    size_t nc_o = mp.sellmeier_o.size();
-    assert (nc_e == nc_o);
+    size_t nce = mp.sellmeier_e.size();
+    size_t nco = mp.sellmeier_o.size();
+    assert (nce == nco);
     double wl_um2 = pow(wavelength * 1e6, 2); 
     double ne, no;
     
-    switch(nc_e)
+    switch(nce)
     {
         case 4:
             ne = sellmeier_eqn(
@@ -110,6 +106,23 @@ std::pair<double, double> get_refractive_indices(double wavelength, MaterialProp
             throw std::logic_error("input not understood");
     }
     return std::pair<double, double>(ne, no);
+}
+
+
+double get_kappa(double wavelength, cispp::MaterialProperties &mp)
+{
+    const double dwl = 1.e-10;
+
+    std::pair<double, double> neno = get_refractive_indices(wavelength, mp);
+    std::pair<double, double> neno_p = get_refractive_indices(wavelength + dwl, mp);
+    std::pair<double, double> neno_m = get_refractive_indices(wavelength - dwl, mp);
+    
+    double biref = neno.first - neno.second;
+    double biref_p = neno_p.first - neno_p.second;
+    double biref_m = neno_m.first - neno_m.second;
+    double biref_deriv = (biref_p - biref_m) / (2 * dwl);
+
+    return 1 - (wavelength / biref) * biref_deriv;
 }
 
 

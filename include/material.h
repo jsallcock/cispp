@@ -15,9 +15,17 @@ struct MaterialProperties
     std::vector<double> sellmeier_o;
 };
 
+
+/**
+ * @brief get default material properties by material name
+ * 
+ * @return MaterialProperties 
+ */
 cispp::MaterialProperties get_material_properties(std::string material_name);
 
 std::pair<double, double> get_refractive_indices(double wavelength, cispp::MaterialProperties &mp);
+
+double get_kappa(double wavelength, cispp::MaterialProperties &mp);
 
 double sellmeier_eqn(double wl_um2, double A, double B, double C, double D);
 

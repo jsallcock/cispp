@@ -16,7 +16,7 @@ namespace cispp {
  * @param delay 
  * @return double 
  */
-std::complex<double> calculate_coherence(std::vector<double> wavelength, std::vector<double> spec_flux, double delay);
+std::complex<double> calculate_coherence(std::vector<double> wavelength, std::vector<double> spec_flux, double delay, double wl0);
 
 
 } // namespace cispp

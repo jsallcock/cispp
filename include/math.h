@@ -7,13 +7,12 @@ namespace cispp {
 
 
 /**
- * @brief 
+ * @brief numerical integration using the trapezoidal rule
  * 
  * @param x 
  * @param y 
- * @return double 
+ * @return 
  */
-// double trapz(std::vector<double> x, std::vector<double> y);
 template <typename T>
 T trapz(std::vector<T> x, std::vector<T> y)
 {
