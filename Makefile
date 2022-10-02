@@ -37,8 +37,8 @@ build/spectrum.o: src/spectrum.cpp include/spectrum.h
 
 
 # COHERENCE
-build/test_coherence: build/test_coherence.o build/coherence.o build/spectrum.o
-	$(CXX) $(CXXFLAGS) build/test_coherence.o build/coherence.o build/spectrum.o -o build/test_coherence
+build/test_coherence: build/test_coherence.o build/coherence.o build/spectrum.o build/math.o
+	$(CXX) $(CXXFLAGS) build/test_coherence.o build/coherence.o build/spectrum.o build/math.o -o build/test_coherence
 
 build/test_coherence.o: test/test_coherence.cpp include/coherence.h
 	$(CXX) $(CXXFLAGS) -c test/test_coherence.cpp -o build/test_coherence.o

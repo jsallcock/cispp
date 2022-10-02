@@ -29,6 +29,15 @@ T trapz(std::vector<T> x, std::vector<T> y)
 }
 
 
+/**
+ * @brief Wrap phase angle into (- pi, pi] radian interval
+ * 
+ * @param p 
+ * @return double 
+ */
+double wrap(double p);
+
+
 } // namespace cispp
 #endif
 
