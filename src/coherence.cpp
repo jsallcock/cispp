@@ -31,7 +31,7 @@ std::complex<double> coherence_gaussian(double wl0, double wlsigma, double flux,
     const double fsigma = - cispp::SPEED_OF_LIGHT * wlsigma / ((wlsigma + wl0) * wl0);
     const std::complex<double> contrast(std::exp(-0.5 * std::pow(fsigma * delay / fd, 2)));
     const std::complex<double> iphase(0, delay + delay * ((f0 - fd) / fd));
-    return contrast * std::exp(iphase); 
+    return flux * contrast * std::exp(iphase); 
 }
 
 

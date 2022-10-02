@@ -21,10 +21,6 @@ cispp::Spectrum gaussian(double wl0, double sigma, double flux, size_t nbins, si
         wl[i] = wl_i;
         s0[i] = std::pow(wl_i, -2) * norm * std::exp(-0.5 * std::pow(((wl0 - wl_i) / wl_i) * c, 2));
     }
-
-    std::cout << "wlmin = " << wl[0] << std::endl;
-    std::cout << "wlmax = " << wl[nbins-1] << std::endl;
-
     return cispp::Spectrum(wl, s0);
 }
 

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include "include/math.h"
 
 
 namespace cispp {
