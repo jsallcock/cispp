@@ -5,7 +5,13 @@ CXXFLAGS+=-I.
 CXXFLAGS+=-mmacosx-version-min=12.5
 
 
-all: build/test_math build/test_coherence build/test_material build/test_component build/test_camera build/test_instrument
+all: build/test_math \
+	 build/test_spectrum \
+	 build/test_coherence \
+	 build/test_material \
+	 build/test_component \
+	 build/test_camera \
+	 build/test_instrument
 
 
 # MATH
@@ -19,9 +25,20 @@ build/math.o: src/math.cpp include/math.h
 	$(CXX) $(CXXFLAGS) -c src/math.cpp -o build/math.o
 
 
+# SPECTRUM
+build/test_spectrum: build/test_spectrum.o build/spectrum.o
+	$(CXX) $(CXXFLAGS) build/test_spectrum.o build/spectrum.o -o build/test_spectrum
+
+build/test_spectrum.o: test/test_spectrum.cpp include/spectrum.h
+	$(CXX) $(CXXFLAGS) -c test/test_spectrum.cpp -o build/test_spectrum.o
+
+build/spectrum.o: src/spectrum.cpp include/spectrum.h
+	$(CXX) $(CXXFLAGS) -c src/spectrum.cpp -o build/spectrum.o
+
+
 # COHERENCE
-build/test_coherence: build/test_coherence.o build/coherence.o
-	$(CXX) $(CXXFLAGS) build/test_coherence.o build/coherence.o -o build/test_coherence
+build/test_coherence: build/test_coherence.o build/coherence.o build/spectrum.o
+	$(CXX) $(CXXFLAGS) build/test_coherence.o build/coherence.o build/spectrum.o -o build/test_coherence
 
 build/test_coherence.o: test/test_coherence.cpp include/coherence.h
 	$(CXX) $(CXXFLAGS) -c test/test_coherence.cpp -o build/test_coherence.o

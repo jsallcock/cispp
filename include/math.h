@@ -1,3 +1,6 @@
+#ifndef CISPP_MATH_H
+#define CISPP_MATH_H
+
 #include <cmath>
 #include <vector>
 #include <iostream>
@@ -27,4 +30,5 @@ T trapz(std::vector<T> x, std::vector<T> y)
 
 
 } // namespace cispp
+#endif
 

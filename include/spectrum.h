@@ -1,21 +1,56 @@
+#ifndef CISPP_SPECTRUM_H
+#define CISPP_SPECTRUM_H
+
+#include <iostream>
+#include <vector>
+
+
+namespace cispp {
+
+
+const double SPEED_OF_LIGHT = 2.99792458e8;
 
 
 /**
- * @brief container for Stokes-resolved spectrum
+ * @brief generic container for Stokes-resolved spectrum
  * 
  */
 struct Spectrum 
 {
-    vector<double> wavelength;
-    vector<double> s0;
-    vector<double> s1;
-    vector<double> s2;
-    vector<double> s3;  
-}
+    std::vector<double> wavelength;
+    std::vector<double> s0;
+    std::vector<double> s1;
+    std::vector<double> s2;
+    std::vector<double> s3;
+
+    Spectrum(std::vector<double> wavelength, std::vector<double> s0)
+    : wavelength(wavelength),
+      s0(s0)
+    {
+        assert (wavelength.size() == s0.size());
+        size_t n = wavelength.size();
+        std::vector<double> s1(n, 0.);
+        std::vector<double> s2(n, 0.);
+        std::vector<double> s3(n, 0.);
+    }
+};
 
 
+/**
+ * @brief Gaussian singlet spectrum, area-normalised to flux
+ * 
+ * @param wl0 central wavelength in metres
+ * @param wlsigma standard deviation wavelenght in metres
+ * @param flux 
+ * @param nbins number of wavelength bins on which to evaluate spectrum 
+ * @param nsigma number of standard deviations from wl0 to extend the wavelength grid
+ * @return Spectrum 
+ */
+Spectrum gaussian(double wl0, double wlsigma, double flux, size_t nbins, size_t nsigma);
 
-Spectrum get_gaussian_singlet();
 
 Spectrum get_gaussian_multiplet();
 
+
+} // namespace cispp
+#endif
