@@ -310,8 +310,25 @@ class SavartPlate: public Retarder
 };
 
 
+/**
+ * @brief test that two components have orientations that differ by 90 or 0 degrees
+ * 
+ * @param c1
+ * @param c2 
+ * @return true 
+ * @return false 
+ */
 bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
 
+
+/**
+ * @brief test that two components have orientations that differ by +/- 45 degrees
+ * 
+ * @param c1
+ * @param c2 
+ * @return true 
+ * @return false 
+ */
 bool test_align45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
 
 

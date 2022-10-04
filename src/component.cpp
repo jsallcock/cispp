@@ -108,31 +108,15 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
 }
 
 
-/**
- * @brief test that two components have orientations that differ by 90 or 0 degrees
- * 
- * @param c1
- * @param c2 
- * @return true 
- * @return false 
- */
 bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
 {
-    return abs(fmod(c1->orientation - c2->orientation, M_PI / 2)) == 0.;
+    return std::abs(fmod(c1->orientation - c2->orientation, M_PI / 2)) == 0.;
 }
 
 
-/**
- * @brief test that two components have orientations that differ by +/- 45 degrees
- * 
- * @param c1
- * @param c2 
- * @return true 
- * @return false 
- */
 bool test_align45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
 {
-    return abs(fmod(c1->orientation - c2->orientation, M_PI / 2)) == M_PI / 4;
+    return std::abs(fmod(c1->orientation - c2->orientation, M_PI / 2)) == M_PI / 4;
 }
 
 
