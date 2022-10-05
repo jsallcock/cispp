@@ -1,6 +1,7 @@
 #include "yaml-cpp/yaml.h"
 #include "include/instrument.h"
 #include "include/camera.h"
+#include "include/math.h"
 
 using std::vector;
 using std::unique_ptr;
@@ -170,18 +171,21 @@ void Instrument::save_image(string fpath, vector<unsigned short int>* image)
 void Instrument::capture(double wavelength, double flux, vector<unsigned short int>* image)
 {
     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
+    
     Eigen::Vector4d stokes_in;
     Eigen::Vector4d stokes_out;
     stokes_in << flux, 0, 0, 0;
-    for (size_t j = 0; j < camera.sensor_format_y; j++)
+
+    for (size_t iy = 0; iy < camera.sensor_format_y; iy++)
     {
-        size_t idx_col = j * camera.sensor_format_x;
-        double y = camera.pixel_centres_y[j];
-        for (size_t i = 0; i < camera.sensor_format_x; i++)
+        size_t icol = iy * camera.sensor_format_x;
+        double y = camera.pixel_centres_y[iy];
+        
+        for (size_t ix = 0; ix < camera.sensor_format_x; ix++)
         {
-            double x = camera.pixel_centres_x[i];
+            double x = camera.pixel_centres_x[ix];
             stokes_out = get_mueller_matrix(x, y, wavelength) * stokes_in;
-            (*image)[i + idx_col] = static_cast<unsigned short int>(stokes_out[0]);
+            (*image)[ix + icol] = static_cast<unsigned short int>(stokes_out[0]);
         }
     }
 }
@@ -189,22 +193,38 @@ void Instrument::capture(double wavelength, double flux, vector<unsigned short i
 
 void Instrument::capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image)
 {
-    // assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
-    // Eigen::Vector4d stokes_in;
-    // Eigen::Vector4d stokes_out;
-    // stokes_in << flux, 0, 0, 0;
+    assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
+    assert(wavelength.size() == spec_flux.size());
 
-    // for (size_t j = 0; j < camera.sensor_format_y; j++)
-    // {
-    //     size_t idx_col = j * camera.sensor_format_x;
-    //     double y = camera.pixel_centres_y[j];
-    //     for (size_t i = 0; i < camera.sensor_format_x; i++)
-    //     {
-    //         double x = camera.pixel_centres_x[i];
-    //         stokes_out = get_mueller_matrix(x, y, wavelength) * stokes_in;
-    //         (*image)[i + idx_col] = static_cast<unsigned short int>(stokes_out[0]);
-    //     }
-    // }
+    Eigen::Vector4d stokes_in;
+    Eigen::Vector4d stokes_out;
+    vector<double> stokes_out0(wavelength.size(), 0.);
+
+    for (size_t iy = 0; iy < camera.sensor_format_y; iy++)
+    {
+        std::cout << iy << '/' << camera.sensor_format_y << '\n';
+        size_t icol = iy * camera.sensor_format_x;
+        double y = camera.pixel_centres_y[iy];
+        for (size_t ix = 0; ix < camera.sensor_format_x; ix++)
+        {
+            double x = camera.pixel_centres_x[ix];
+            
+            for (size_t iwl=0; iwl < wavelength.size(); iwl++) 
+            {
+                double wl = wavelength[iwl];
+                stokes_in(0) = spec_flux[iwl];
+                stokes_in(1) = 0;
+                stokes_in(2) = 0;
+                stokes_in(3) = 0;
+                stokes_out = get_mueller_matrix(x, y, wl) * stokes_in;
+                // std::cout << stokes_out << "\n\n\n\n\n\n\n\n\n\n";
+                stokes_out0[iwl] = stokes_out(0);
+            }
+
+            // std::cout << cispp::trapz(wavelength, stokes_out0) << '\n';
+            (*image)[ix + icol] = static_cast<unsigned short int>(cispp::trapz(wavelength, stokes_out0));
+        }
+    }
 }
 
 

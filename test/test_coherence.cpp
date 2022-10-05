@@ -3,7 +3,6 @@
 #include "include/spectrum.h"
 
 
-
 bool test_coherence_gaussian()
 {
     double delay = 40000;
