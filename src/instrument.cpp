@@ -197,12 +197,14 @@ void Instrument::capture(vector<double> wavelength, vector<double> spec_flux, ve
     assert(wavelength.size() == spec_flux.size());
 
     Eigen::Vector4d stokes_in;
+    stokes_in(1) = 0;
+    stokes_in(2) = 0;
+    stokes_in(3) = 0;
     Eigen::Vector4d stokes_out;
     vector<double> stokes_out0(wavelength.size(), 0.);
 
     for (size_t iy = 0; iy < camera.sensor_format_y; iy++)
     {
-        std::cout << iy << '/' << camera.sensor_format_y << '\n';
         size_t icol = iy * camera.sensor_format_x;
         double y = camera.pixel_centres_y[iy];
         for (size_t ix = 0; ix < camera.sensor_format_x; ix++)
@@ -213,15 +215,9 @@ void Instrument::capture(vector<double> wavelength, vector<double> spec_flux, ve
             {
                 double wl = wavelength[iwl];
                 stokes_in(0) = spec_flux[iwl];
-                stokes_in(1) = 0;
-                stokes_in(2) = 0;
-                stokes_in(3) = 0;
-                stokes_out = get_mueller_matrix(x, y, wl) * stokes_in;
-                // std::cout << stokes_out << "\n\n\n\n\n\n\n\n\n\n";
-                stokes_out0[iwl] = stokes_out(0);
+                stokes_out0[iwl] = (get_mueller_matrix(x, y, wl) * stokes_in)(0);
             }
-
-            // std::cout << cispp::trapz(wavelength, stokes_out0) << '\n';
+            
             (*image)[ix + icol] = static_cast<unsigned short int>(cispp::trapz(wavelength, stokes_out0));
         }
     }

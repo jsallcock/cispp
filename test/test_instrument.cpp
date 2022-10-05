@@ -114,7 +114,7 @@ bool test_capture(std::filesystem::path fp_root)
     double wl0 = 465e-9;
     double wlsigma = 0.1e-9;
     double flux = 500;
-    size_t nbins = 20;
+    size_t nbins = 15;
     size_t nsigma = 4;
 
     cispp::Spectrum spec = cispp::gaussian(wl0, wlsigma, flux, nbins, nsigma);
