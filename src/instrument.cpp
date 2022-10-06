@@ -217,14 +217,14 @@ void Instrument::capture(vector<double> wavelength, vector<double> spec_flux, ve
                 stokes_in(0) = spec_flux[iwl];
                 stokes_out0[iwl] = (get_mueller_matrix(x, y, wl) * stokes_in)(0);
             }
-            
+
             (*image)[ix + icol] = static_cast<unsigned short int>(cispp::trapz(wavelength, stokes_out0));
         }
     }
 }
 
 
-bool Instrument1DL::test_type(const YAML::Node node)
+bool InstrumentSingleDelayLinear::test_type(const YAML::Node node)
 {
     vector<unique_ptr<cispp::Component>> components_test;
     Instrument::parse_node_components(node["interferometer"], components_test);
@@ -254,25 +254,59 @@ bool Instrument1DL::test_type(const YAML::Node node)
 }
 
 
-void Instrument1DL::capture(double wavelength, double flux, vector<unsigned short int>* image)
+void InstrumentSingleDelayLinear::capture(double wavelength, double flux, vector<unsigned short int>* image)
 {
-    for (size_t j = 0; j < camera.sensor_format_y; j++) 
+    for (size_t iy = 0; iy < camera.sensor_format_y; iy++) 
     {
-        size_t idx_col = j * camera.sensor_format_x;
-        double y = camera.pixel_centres_y[j];
-        for (size_t i = 0; i < camera.sensor_format_x; i++) 
+        size_t icol = iy * camera.sensor_format_x;
+        double y = camera.pixel_centres_y[iy];
+        for (size_t ix = 0; ix < camera.sensor_format_x; ix++) 
         {
-            double x = camera.pixel_centres_x[i];
+            double x = camera.pixel_centres_x[ix];
             double inc_angle = get_inc_angle(x, y, components[1]);
             double azim_angle = get_azim_angle(x, y, components[1]);
             double delay = components[1]->get_delay(wavelength, inc_angle, azim_angle);
-            (*image)[i + idx_col] = static_cast<unsigned short int>((flux / 4) * (1 + cos(delay)));
+            (*image)[ix + icol] = static_cast<unsigned short int>((flux / 4) * (1 + cos(delay)));
         }
     }
 }
 
 
-bool Instrument1DP::test_type(const YAML::Node node)
+void InstrumentSingleDelayLinear::capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image)
+{
+    assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
+    assert(wavelength.size() == spec_flux.size());
+
+    Eigen::Vector4d stokes_in;
+    stokes_in(1) = 0;
+    stokes_in(2) = 0;
+    stokes_in(3) = 0;
+    Eigen::Vector4d stokes_out;
+    vector<double> stokes_out0(wavelength.size(), 0.);
+
+    for (size_t iy = 0; iy < camera.sensor_format_y; iy++)
+    {
+        size_t icol = iy * camera.sensor_format_x;
+        double y = camera.pixel_centres_y[iy];
+        for (size_t ix = 0; ix < camera.sensor_format_x; ix++)
+        {
+            double x = camera.pixel_centres_x[ix];
+            double inc_angle = get_inc_angle(x, y, components[1]);
+            double azim_angle = get_azim_angle(x, y, components[1]);
+            
+            for (size_t iwl=0; iwl < wavelength.size(); iwl++) 
+            {
+                double wl = wavelength[iwl];
+                double delay = components[1]->get_delay(wl, inc_angle, azim_angle); 
+                stokes_out0[iwl] = (spec_flux[iwl] / 4) * (1 + cos(delay));
+            }
+            (*image)[ix + icol] = static_cast<unsigned short int>(cispp::trapz(wavelength, stokes_out0));
+        }
+    }
+}
+
+
+bool InstrumentSingleDelayPixelated::test_type(const YAML::Node node)
 {
     vector<unique_ptr<cispp::Component>> components_test;
     Instrument::parse_node_components(node["interferometer"], components_test);
@@ -301,7 +335,7 @@ bool Instrument1DP::test_type(const YAML::Node node)
 }
 
 
-void Instrument1DP::capture(double wavelength, double flux, vector<unsigned short int>* image)
+void InstrumentSingleDelayPixelated::capture(double wavelength, double flux, vector<unsigned short int>* image)
 {
     for (size_t j = 0; j < camera.sensor_format_y; j++)
     {
@@ -324,12 +358,12 @@ unique_ptr<cispp::Instrument> load_instrument(std::filesystem::path fp_config, b
 {
     const YAML::Node node = YAML::LoadFile(fp_config);
 
-    if (!force_mueller && Instrument1DL::test_type(node)) {
-        return std::make_unique<cispp::Instrument1DL>(fp_config);
+    if (!force_mueller && InstrumentSingleDelayLinear::test_type(node)) {
+        return std::make_unique<cispp::InstrumentSingleDelayLinear>(fp_config);
     }
 
-    else if (!force_mueller && Instrument1DP::test_type(node)) {
-        return std::make_unique<cispp::Instrument1DP>(fp_config);
+    else if (!force_mueller && InstrumentSingleDelayPixelated::test_type(node)) {
+        return std::make_unique<cispp::InstrumentSingleDelayPixelated>(fp_config);
     }
 
     else {

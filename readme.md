@@ -8,3 +8,8 @@ Requires:
 - [Eigen](https://gitlab.com/libeigen/eigen): Linear algebra library used for Mueller matrix model.
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp): .YAML config file parsing.
 - [FFTW](https://github.com/FFTW/fftw3): Fast Fourier transforms used in demodulation of data (not implemented yet).
+
+TODO:
+- Output images to HDF5
+- Output images to a real image format (not .pbm)
+- Parallelise

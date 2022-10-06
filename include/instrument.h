@@ -107,11 +107,11 @@ class Instrument
 };
 
 
-class Instrument1DL: public Instrument
+class InstrumentSingleDelayLinear: public Instrument
 {
     public:
 
-    Instrument1DL(std::filesystem::path fp_config)
+    InstrumentSingleDelayLinear(std::filesystem::path fp_config)
     : Instrument(fp_config)
     {
         type = "single_delay_linear";
@@ -120,14 +120,16 @@ class Instrument1DL: public Instrument
     static bool test_type(const YAML::Node node);
 
     void capture(double wavelength, double flux, vector<unsigned short int>* image) override;
+
+    void capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image) override;
 };
 
 
-class Instrument1DP: public Instrument
+class InstrumentSingleDelayPixelated: public Instrument
 {
     public:
 
-    Instrument1DP(std::filesystem::path fp_config)
+    InstrumentSingleDelayPixelated(std::filesystem::path fp_config)
     : Instrument(fp_config)
     {
         type = "single_delay_pixelated";
@@ -136,6 +138,8 @@ class Instrument1DP: public Instrument
     static bool test_type(const YAML::Node node);
 
     void capture(double wavelength, double flux, vector<unsigned short int>* image) override;
+
+    // void capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image) override;
 };
 
 /**
