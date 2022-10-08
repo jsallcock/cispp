@@ -9,7 +9,7 @@
 namespace cispp {
 
 
-Eigen::Matrix4d get_rotation_matrix(double angle)
+Eigen::Matrix4d GetRotationMatrix(double angle)
 {
     double a2 = 2 * angle;
     double s2 = sin(a2);
@@ -25,11 +25,11 @@ Eigen::Matrix4d get_rotation_matrix(double angle)
 }
 
 
-Eigen::Matrix4d Component::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
+Eigen::Matrix4d Component::GetMuellerMatrix(double wavelength, double inc_angle, double azim_angle)
 {
-    double delay = get_delay(wavelength, inc_angle, azim_angle);
-    double t1 = get_t1(wavelength, inc_angle, azim_angle);
-    double t2 = get_t2(wavelength, inc_angle, azim_angle);
+    double delay = GetDelay(wavelength, inc_angle, azim_angle);
+    double t1 = GetT1(wavelength, inc_angle, azim_angle);
+    double t2 = GetT2(wavelength, inc_angle, azim_angle);
     double sum = (t1 + t2) / 2;
     double diff = (t1 - t2) / 2;
     double prod = 2 * sqrt(t1 * t2);
@@ -42,12 +42,12 @@ Eigen::Matrix4d Component::get_mueller_matrix(double wavelength, double inc_angl
             0,    0,  pcd,  psd,
             0,    0, -psd,  pcd;
 
-    Eigen::Matrix4d rot = get_rotation_matrix(orientation);
+    Eigen::Matrix4d rot = GetRotationMatrix(orientation);
     return rot.transpose() * m * rot;
 }
 
 
-Eigen::Matrix4d Polariser::get_mueller_matrix()
+Eigen::Matrix4d Polariser::GetMuellerMatrix()
 {
     Eigen::Matrix4d m;
     m << 0.5, 0.5,   0,   0, 
@@ -55,19 +55,19 @@ Eigen::Matrix4d Polariser::get_mueller_matrix()
            0,   0,   0,   0,
            0,   0,   0,   0;
 
-    Eigen::Matrix4d rot = get_rotation_matrix(orientation);
+    Eigen::Matrix4d rot = GetRotationMatrix(orientation);
     return rot.transpose() * m * rot;
 }
 
 
-Eigen::Matrix4d Polariser::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) {
-    return get_mueller_matrix();
+Eigen::Matrix4d Polariser::GetMuellerMatrix(double wavelength, double inc_angle, double azim_angle) {
+    return GetMuellerMatrix();
 }
 
 
-Eigen::Matrix4d Retarder::get_mueller_matrix(double wavelength, double inc_angle, double azim_angle)
+Eigen::Matrix4d Retarder::GetMuellerMatrix(double wavelength, double inc_angle, double azim_angle)
 {
-    double delay = get_delay(wavelength, inc_angle, azim_angle);
+    double delay = GetDelay(wavelength, inc_angle, azim_angle);
     double sd = sin(delay);
     double cd = cos(delay);
     Eigen::Matrix4d m;
@@ -77,14 +77,14 @@ Eigen::Matrix4d Retarder::get_mueller_matrix(double wavelength, double inc_angle
            0,   0,  cd,  sd,
            0,   0, -sd,  cd;
 
-    Eigen::Matrix4d rot = get_rotation_matrix(orientation);
+    Eigen::Matrix4d rot = GetRotationMatrix(orientation);
     return rot.transpose() * m * rot;
 }
 
 
-double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double azim_angle)
+double UniaxialCrystal::GetDelay(double wavelength, double inc_angle, double azim_angle)
 {
-    std::pair<double, double> neno = get_refractive_indices(wavelength, material);
+    std::pair<double, double> neno = GetRefractiveIndices(wavelength, material);
     double ne = neno.first; 
     double no = neno.second;
 
@@ -108,13 +108,13 @@ double UniaxialCrystal::get_delay(double wavelength, double inc_angle, double az
 }
 
 
-bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
+bool TestAlign90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
 {
     return std::abs(fmod(c1->orientation - c2->orientation, M_PI / 2)) == 0.;
 }
 
 
-bool test_align45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
+bool TestAlign45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2)
 {
     return std::abs(fmod(c1->orientation - c2->orientation, M_PI / 2)) == M_PI / 4;
 }

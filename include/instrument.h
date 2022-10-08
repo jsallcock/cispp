@@ -1,5 +1,6 @@
 #ifndef CISPP_INSTRUMENT_H
 #define CISPP_INSTRUMENT_H
+
 #include <memory>
 #include <vector>
 #include <string>
@@ -41,9 +42,9 @@ class Instrument
 
     virtual ~Instrument() = default;
 
-    static cispp::Camera parse_node_camera(YAML::Node nd_camera);
+    static cispp::Camera ParseNodeCamera(YAML::Node nd_camera);
 
-    static void parse_node_components(YAML::Node nd_components, vector<unique_ptr<cispp::Component>>& components);
+    static void ParseNodeComponents(YAML::Node nd_components, vector<unique_ptr<cispp::Component>>& components);
 
     void write_config();
 
@@ -55,7 +56,7 @@ class Instrument
      * @param component unique pointer to component
      * @return double 
      */
-    double get_inc_angle(double x, double y, unique_ptr<cispp::Component>& component);
+    double GetIncidenceAngle(double x, double y, unique_ptr<cispp::Component>& component);
 
     /**
      * @brief Azimuthal angle in radians of ray through interfereometer component
@@ -65,7 +66,7 @@ class Instrument
      * @param component unique pointer to component
      * @return double 
      */
-    double get_azim_angle(double x, double y, unique_ptr<cispp::Component>& component);
+    double GetAzimuthalAngle(double x, double y, unique_ptr<cispp::Component>& component);
 
     /**
      * @brief Total Mueller matrix for instrument
@@ -75,26 +76,17 @@ class Instrument
      * @param wavelength wavelength of ray
      * @return Eigen::Matrix4d 
      */
-    Eigen::Matrix4d get_mueller_matrix(double x, double y, double wavelength);
+    Eigen::Matrix4d GetMuellerMatrix(double x, double y, double wavelength);
 
     /**
-     * @brief save captured image to .PGM (portable GrayMap) file
+     * @brief save Captured image to .PGM (portable GrayMap) file
      * 
      * @param fpath filepath (.PPM)
      * @param image pointer to image vector (row-major order)
      */
-    void save_image(string fpath, vector<unsigned short int>* image);
+    void SaveImage(string fpath, vector<unsigned short int>* image);
 
-    void get_delay();
-
-    /**
-     * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light (Mueller model)
-     * 
-     * @param wavelength wavelength of light in metres
-     * @param flux photon flux
-     * @param image pointer to image vector (row-major order)
-     */
-    virtual void capture(double wavelength, double flux, vector<unsigned short int>* image);
+    void GetDelay();
 
     /**
      * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light (Mueller model)
@@ -103,7 +95,16 @@ class Instrument
      * @param flux photon flux
      * @param image pointer to image vector (row-major order)
      */
-    virtual void capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image);
+    virtual void Capture(double wavelength, double flux, vector<unsigned short int>* image);
+
+    /**
+     * @brief Capture interferogram for a uniform scene of monochromatic, unpolarised light (Mueller model)
+     * 
+     * @param wavelength wavelength of light in metres
+     * @param flux photon flux
+     * @param image pointer to image vector (row-major order)
+     */
+    virtual void Capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image);
 };
 
 
@@ -117,11 +118,11 @@ class InstrumentSingleDelayLinear: public Instrument
         type = "single_delay_linear";
     }
 
-    static bool test_type(const YAML::Node node);
+    static bool TestType(const YAML::Node node);
 
-    void capture(double wavelength, double flux, vector<unsigned short int>* image) override;
+    void Capture(double wavelength, double flux, vector<unsigned short int>* image) override;
 
-    void capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image) override;
+    void Capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image) override;
 };
 
 
@@ -135,11 +136,11 @@ class InstrumentSingleDelayPixelated: public Instrument
         type = "single_delay_pixelated";
     }
 
-    static bool test_type(const YAML::Node node);
+    static bool TestType(const YAML::Node node);
 
-    void capture(double wavelength, double flux, vector<unsigned short int>* image) override;
+    void Capture(double wavelength, double flux, vector<unsigned short int>* image) override;
 
-    // void capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image) override;
+    void Capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image) override;
 };
 
 /**
@@ -149,7 +150,7 @@ class InstrumentSingleDelayPixelated: public Instrument
  * @param force_mueller 
  * @return Instrument 
  */
-unique_ptr<cispp::Instrument> load_instrument(std::filesystem::path fp_config, bool force_mueller=false);
+unique_ptr<cispp::Instrument> LoadInstrument(std::filesystem::path fp_config, bool force_mueller=false);
 
 
 } // namespace cispp

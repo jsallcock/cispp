@@ -22,12 +22,12 @@ Instrument::Instrument(std::filesystem::path fp_config)
     lens_2_focal_length = nd_config["lens_2_focal_length"].as<double>();
     lens_3_focal_length = nd_config["lens_3_focal_length"].as<double>();
 
-    camera = parse_node_camera(nd_camera);
-    parse_node_components(nd_components, components);
+    camera = ParseNodeCamera(nd_camera);
+    ParseNodeComponents(nd_components, components);
 }
 
 
-cispp::Camera Instrument::parse_node_camera(YAML::Node nd_camera)
+cispp::Camera Instrument::ParseNodeCamera(YAML::Node nd_camera)
 {
     cispp::Camera cam(
         nd_camera["sensor_format"][0].as<int>(),  // sensor_format_x
@@ -42,7 +42,7 @@ cispp::Camera Instrument::parse_node_camera(YAML::Node nd_camera)
     return cam;
 }
 
-void Instrument::parse_node_components(YAML::Node nd_components, vector<unique_ptr<cispp::Component>>& components)
+void Instrument::ParseNodeComponents(YAML::Node nd_components, vector<unique_ptr<cispp::Component>>& components)
 {
     for (size_t i = 0; i < nd_components.size(); i++)
     {
@@ -110,7 +110,7 @@ void Instrument::parse_node_components(YAML::Node nd_components, vector<unique_p
 }
 
 
-double Instrument::get_inc_angle(double x, double y, unique_ptr<cispp::Component>& component)
+double Instrument::GetIncidenceAngle(double x, double y, unique_ptr<cispp::Component>& component)
 {
     double x0 = lens_3_focal_length * tan(component->tilt_x);
     double y0 = lens_3_focal_length * tan(component->tilt_y);
@@ -118,7 +118,7 @@ double Instrument::get_inc_angle(double x, double y, unique_ptr<cispp::Component
 }
 
 
-double Instrument::get_azim_angle(double x, double y, unique_ptr<cispp::Component>& component)
+double Instrument::GetAzimuthalAngle(double x, double y, unique_ptr<cispp::Component>& component)
 {
     double x0 = lens_3_focal_length * tan(component->tilt_x);
     double y0 = lens_3_focal_length * tan(component->tilt_y);
@@ -126,14 +126,14 @@ double Instrument::get_azim_angle(double x, double y, unique_ptr<cispp::Componen
 }
 
 
-Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavelength)
+Eigen::Matrix4d Instrument::GetMuellerMatrix(double x, double y, double wavelength)
 {
     Eigen::Matrix4d mtot;
     for (size_t i = 0; i < components.size(); i++)
     {  
-        double inc_angle = get_inc_angle(x, y, components[i]);
-        double azim_angle = get_azim_angle(x, y, components[i]);
-        Eigen::Matrix4d m = components[i]->get_mueller_matrix(wavelength, inc_angle, azim_angle);
+        double inc_angle = GetIncidenceAngle(x, y, components[i]);
+        double azim_angle = GetAzimuthalAngle(x, y, components[i]);
+        Eigen::Matrix4d m = components[i]->GetMuellerMatrix(wavelength, inc_angle, azim_angle);
         if (i==0){
             mtot = m;
         }
@@ -142,13 +142,13 @@ Eigen::Matrix4d Instrument::get_mueller_matrix(double x, double y, double wavele
         }
     }
     if (camera.type == "monochrome_polarised"){
-        mtot *= camera.get_mueller_matrix(x, y);
+        mtot *= camera.GetMuellerMatrix(x, y);
     }
     return mtot;
 }
 
 
-void Instrument::save_image(string fpath, vector<unsigned short int>* image)
+void Instrument::SaveImage(string fpath, vector<unsigned short int>* image)
 {
     std::ofstream file;
     file.open(fpath);
@@ -168,7 +168,7 @@ void Instrument::save_image(string fpath, vector<unsigned short int>* image)
 }
 
 
-void Instrument::capture(double wavelength, double flux, vector<unsigned short int>* image)
+void Instrument::Capture(double wavelength, double flux, vector<unsigned short int>* image)
 {
     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
     
@@ -184,14 +184,14 @@ void Instrument::capture(double wavelength, double flux, vector<unsigned short i
         for (size_t ix = 0; ix < camera.sensor_format_x; ix++)
         {
             double x = camera.pixel_centres_x[ix];
-            stokes_out = get_mueller_matrix(x, y, wavelength) * stokes_in;
+            stokes_out = GetMuellerMatrix(x, y, wavelength) * stokes_in;
             (*image)[ix + icol] = static_cast<unsigned short int>(stokes_out[0]);
         }
     }
 }
 
 
-void Instrument::capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image)
+void Instrument::Capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image)
 {
     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
     assert(wavelength.size() == spec_flux.size());
@@ -215,7 +215,7 @@ void Instrument::capture(vector<double> wavelength, vector<double> spec_flux, ve
             {
                 double wl = wavelength[iwl];
                 stokes_in(0) = spec_flux[iwl];
-                stokes_out0[iwl] = (get_mueller_matrix(x, y, wl) * stokes_in)(0);
+                stokes_out0[iwl] = (GetMuellerMatrix(x, y, wl) * stokes_in)(0);
             }
 
             (*image)[ix + icol] = static_cast<unsigned short int>(cispp::trapz(wavelength, stokes_out0));
@@ -224,24 +224,24 @@ void Instrument::capture(vector<double> wavelength, vector<double> spec_flux, ve
 }
 
 
-bool InstrumentSingleDelayLinear::test_type(const YAML::Node node)
+bool InstrumentSingleDelayLinear::TestType(const YAML::Node node)
 {
     vector<unique_ptr<cispp::Component>> components_test;
-    Instrument::parse_node_components(node["interferometer"], components_test);
-    cispp::Camera cam = parse_node_camera(node["camera"]);
+    Instrument::ParseNodeComponents(node["interferometer"], components_test);
+    cispp::Camera cam = ParseNodeCamera(node["camera"]);
 
     size_t n = components_test.size();
     if (n > 2 &&
         cam.type == "monochrome" &&
-        components_test[0]->is_polariser() && 
-        components_test[n-1]->is_polariser() &&
-        test_align90(components_test[0], components_test[n-1]))
+        components_test[0]->IsIdealPolariser() && 
+        components_test[n-1]->IsIdealPolariser() &&
+        TestAlign90(components_test[0], components_test[n-1]))
     {
         size_t rcount = 0;
         for (size_t i=1; i<n-1; i++)
         {
-            if (components_test[i]->is_retarder() && 
-                test_align45(components_test[i], components_test[0])) 
+            if (components_test[i]->IsIdealRetarder() && 
+                TestAlign45(components_test[i], components_test[0])) 
             {
                 rcount++;
             }
@@ -254,7 +254,7 @@ bool InstrumentSingleDelayLinear::test_type(const YAML::Node node)
 }
 
 
-void InstrumentSingleDelayLinear::capture(double wavelength, double flux, vector<unsigned short int>* image)
+void InstrumentSingleDelayLinear::Capture(double wavelength, double flux, vector<unsigned short int>* image)
 {
     for (size_t iy = 0; iy < camera.sensor_format_y; iy++) 
     {
@@ -263,16 +263,16 @@ void InstrumentSingleDelayLinear::capture(double wavelength, double flux, vector
         for (size_t ix = 0; ix < camera.sensor_format_x; ix++) 
         {
             double x = camera.pixel_centres_x[ix];
-            double inc_angle = get_inc_angle(x, y, components[1]);
-            double azim_angle = get_azim_angle(x, y, components[1]);
-            double delay = components[1]->get_delay(wavelength, inc_angle, azim_angle);
+            double inc_angle = GetIncidenceAngle(x, y, components[1]);
+            double azim_angle = GetAzimuthalAngle(x, y, components[1]);
+            double delay = components[1]->GetDelay(wavelength, inc_angle, azim_angle);
             (*image)[ix + icol] = static_cast<unsigned short int>((flux / 4) * (1 + cos(delay)));
         }
     }
 }
 
 
-void InstrumentSingleDelayLinear::capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image)
+void InstrumentSingleDelayLinear::Capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image)
 {
     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
     assert(wavelength.size() == spec_flux.size());
@@ -291,13 +291,13 @@ void InstrumentSingleDelayLinear::capture(vector<double> wavelength, vector<doub
         for (size_t ix = 0; ix < camera.sensor_format_x; ix++)
         {
             double x = camera.pixel_centres_x[ix];
-            double inc_angle = get_inc_angle(x, y, components[1]);
-            double azim_angle = get_azim_angle(x, y, components[1]);
+            double inc_angle = GetIncidenceAngle(x, y, components[1]);
+            double azim_angle = GetAzimuthalAngle(x, y, components[1]);
             
             for (size_t iwl=0; iwl < wavelength.size(); iwl++) 
             {
                 double wl = wavelength[iwl];
-                double delay = components[1]->get_delay(wl, inc_angle, azim_angle); 
+                double delay = components[1]->GetDelay(wl, inc_angle, azim_angle); 
                 stokes_out0[iwl] = (spec_flux[iwl] / 4) * (1 + cos(delay));
             }
             (*image)[ix + icol] = static_cast<unsigned short int>(cispp::trapz(wavelength, stokes_out0));
@@ -306,24 +306,24 @@ void InstrumentSingleDelayLinear::capture(vector<double> wavelength, vector<doub
 }
 
 
-bool InstrumentSingleDelayPixelated::test_type(const YAML::Node node)
+bool InstrumentSingleDelayPixelated::TestType(const YAML::Node node)
 {
     vector<unique_ptr<cispp::Component>> components_test;
-    Instrument::parse_node_components(node["interferometer"], components_test);
-    cispp::Camera cam = parse_node_camera(node["camera"]);
+    Instrument::ParseNodeComponents(node["interferometer"], components_test);
+    cispp::Camera cam = ParseNodeCamera(node["camera"]);
 
     size_t n = components_test.size();
     if (n > 2 &&
         cam.type == "monochrome_polarised" &&
-        components_test[0]->is_polariser() && 
-        components_test[n-1]->is_quarterwaveplate() &&
-        test_align90(components_test[0], components_test[n-1]))
+        components_test[0]->IsIdealPolariser() && 
+        components_test[n-1]->IsIdealQuarterWaveplate() &&
+        TestAlign90(components_test[0], components_test[n-1]))
     {
         size_t rcount = 0;
         for (size_t i=1; i<n-1; i++)
         {
-            if (components_test[i]->is_retarder() && 
-                test_align45(components_test[i], components_test[0])) {
+            if (components_test[i]->IsIdealRetarder() && 
+                TestAlign45(components_test[i], components_test[0])) {
                 rcount++;
             }
         }
@@ -335,7 +335,7 @@ bool InstrumentSingleDelayPixelated::test_type(const YAML::Node node)
 }
 
 
-void InstrumentSingleDelayPixelated::capture(double wavelength, double flux, vector<unsigned short int>* image)
+void InstrumentSingleDelayPixelated::Capture(double wavelength, double flux, vector<unsigned short int>* image)
 {
     for (size_t j = 0; j < camera.sensor_format_y; j++)
     {
@@ -344,9 +344,9 @@ void InstrumentSingleDelayPixelated::capture(double wavelength, double flux, vec
         for (size_t i = 0; i < camera.sensor_format_x; i++)
         {
             double x = camera.pixel_centres_x[i];
-            double inc_angle = get_inc_angle(x, y, components[1]);
-            double azim_angle = get_azim_angle(x, y, components[1]);
-            double delay = components[1]->get_delay(wavelength, inc_angle, azim_angle);
+            double inc_angle = GetIncidenceAngle(x, y, components[1]);
+            double azim_angle = GetAzimuthalAngle(x, y, components[1]);
+            double delay = components[1]->GetDelay(wavelength, inc_angle, azim_angle);
             double mask = camera.get_pixelated_phase_mask(x, y);
             (*image)[i + idx_col] = static_cast<unsigned short int>((flux / 4) * (1 + cos(delay + mask)));
         }
@@ -354,15 +354,50 @@ void InstrumentSingleDelayPixelated::capture(double wavelength, double flux, vec
 }
 
 
-unique_ptr<cispp::Instrument> load_instrument(std::filesystem::path fp_config, bool force_mueller)
+void InstrumentSingleDelayPixelated::Capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image)
+{
+    assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
+    assert(wavelength.size() == spec_flux.size());
+
+    Eigen::Vector4d stokes_in;
+    stokes_in(1) = 0;
+    stokes_in(2) = 0;
+    stokes_in(3) = 0;
+    Eigen::Vector4d stokes_out;
+    vector<double> stokes_out0(wavelength.size(), 0.);
+
+    for (size_t iy = 0; iy < camera.sensor_format_y; iy++)
+    {
+        size_t icol = iy * camera.sensor_format_x;
+        double y = camera.pixel_centres_y[iy];
+        for (size_t ix = 0; ix < camera.sensor_format_x; ix++)
+        {
+            double x = camera.pixel_centres_x[ix];
+            double inc_angle = GetIncidenceAngle(x, y, components[1]);
+            double azim_angle = GetAzimuthalAngle(x, y, components[1]);
+            double mask = camera.get_pixelated_phase_mask(x, y);
+
+            for (size_t iwl=0; iwl < wavelength.size(); iwl++) 
+            {
+                double wl = wavelength[iwl];
+                double delay = components[1]->GetDelay(wl, inc_angle, azim_angle); 
+                stokes_out0[iwl] = (spec_flux[iwl] / 4) * (1 + cos(delay + mask));
+            }
+            (*image)[ix + icol] = static_cast<unsigned short int>(cispp::trapz(wavelength, stokes_out0));
+        }
+    }
+}
+
+
+unique_ptr<cispp::Instrument> LoadInstrument(std::filesystem::path fp_config, bool force_mueller)
 {
     const YAML::Node node = YAML::LoadFile(fp_config);
 
-    if (!force_mueller && InstrumentSingleDelayLinear::test_type(node)) {
+    if (!force_mueller && InstrumentSingleDelayLinear::TestType(node)) {
         return std::make_unique<cispp::InstrumentSingleDelayLinear>(fp_config);
     }
 
-    else if (!force_mueller && InstrumentSingleDelayPixelated::test_type(node)) {
+    else if (!force_mueller && InstrumentSingleDelayPixelated::TestType(node)) {
         return std::make_unique<cispp::InstrumentSingleDelayPixelated>(fp_config);
     }
 

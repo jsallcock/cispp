@@ -149,7 +149,7 @@ class Camera
      * @param y y-pixel index
      * @return Eigen::Matrix4d 
      */
-    Eigen::Matrix4d get_mueller_matrix(double x, double y);
+    Eigen::Matrix4d GetMuellerMatrix(double x, double y);
 };
 
 

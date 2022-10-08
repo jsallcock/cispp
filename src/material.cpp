@@ -10,7 +10,7 @@ namespace cispp {
 
 
 
-MaterialProperties get_material_properties(std::string material_name)
+MaterialProperties GetMaterialProperties(std::string material_name)
 {
     MaterialProperties mp = {};
     mp.name = material_name;
@@ -35,7 +35,7 @@ MaterialProperties get_material_properties(std::string material_name)
 }
 
 
-std::pair<double, double> get_refractive_indices(double wavelength, MaterialProperties &mp)
+std::pair<double, double> GetRefractiveIndices(double wavelength, MaterialProperties &mp)
 {
     size_t nce = mp.sellmeier_e.size();
     size_t nco = mp.sellmeier_o.size();
@@ -46,14 +46,14 @@ std::pair<double, double> get_refractive_indices(double wavelength, MaterialProp
     switch(nce)
     {
         case 4:
-            ne = sellmeier_eqn(
+            ne = SellmeierEqn(
                 wl_um2, 
                 mp.sellmeier_e[0], 
                 mp.sellmeier_e[1], 
                 mp.sellmeier_e[2], 
                 mp.sellmeier_e[3]
             );
-            no = sellmeier_eqn(
+            no = SellmeierEqn(
                 wl_um2, 
                 mp.sellmeier_o[0], 
                 mp.sellmeier_o[1], 
@@ -63,7 +63,7 @@ std::pair<double, double> get_refractive_indices(double wavelength, MaterialProp
             break;
         
         case 5:
-            ne = sellmeier_eqn(
+            ne = SellmeierEqn(
                 wl_um2, 
                 mp.sellmeier_e[0], 
                 mp.sellmeier_e[1], 
@@ -71,7 +71,7 @@ std::pair<double, double> get_refractive_indices(double wavelength, MaterialProp
                 mp.sellmeier_e[3],
                 mp.sellmeier_e[4]
             );
-            no = sellmeier_eqn(
+            no = SellmeierEqn(
                 wl_um2, 
                 mp.sellmeier_o[0], 
                 mp.sellmeier_o[1], 
@@ -82,7 +82,7 @@ std::pair<double, double> get_refractive_indices(double wavelength, MaterialProp
             break;
         
         case 6:
-            ne = sellmeier_eqn(
+            ne = SellmeierEqn(
                 wl_um2, 
                 mp.sellmeier_e[0], 
                 mp.sellmeier_e[1], 
@@ -91,7 +91,7 @@ std::pair<double, double> get_refractive_indices(double wavelength, MaterialProp
                 mp.sellmeier_e[4],
                 mp.sellmeier_e[5]
             );
-            no = sellmeier_eqn(
+            no = SellmeierEqn(
                 wl_um2, 
                 mp.sellmeier_o[0], 
                 mp.sellmeier_o[1], 
@@ -109,13 +109,13 @@ std::pair<double, double> get_refractive_indices(double wavelength, MaterialProp
 }
 
 
-double get_kappa(double wavelength, cispp::MaterialProperties &mp)
+double GetKappa(double wavelength, cispp::MaterialProperties &mp)
 {
     const double dwl = 1.e-10;
 
-    std::pair<double, double> neno = get_refractive_indices(wavelength, mp);
-    std::pair<double, double> neno_p = get_refractive_indices(wavelength + dwl, mp);
-    std::pair<double, double> neno_m = get_refractive_indices(wavelength - dwl, mp);
+    std::pair<double, double> neno = GetRefractiveIndices(wavelength, mp);
+    std::pair<double, double> neno_p = GetRefractiveIndices(wavelength + dwl, mp);
+    std::pair<double, double> neno_m = GetRefractiveIndices(wavelength - dwl, mp);
     
     double biref = neno.first - neno.second;
     double biref_p = neno_p.first - neno_p.second;
@@ -136,7 +136,7 @@ double get_kappa(double wavelength, cispp::MaterialProperties &mp)
  * @param D 
  * @return double refractive index
  */
-double sellmeier_eqn(double wl_um2, double A, double B, double C, double D)
+double SellmeierEqn(double wl_um2, double A, double B, double C, double D)
 {
     return sqrt(A + (B / (wl_um2 + C)) + (D * wl_um2));
 }
@@ -153,7 +153,7 @@ double sellmeier_eqn(double wl_um2, double A, double B, double C, double D)
  * @param E 
  * @return double refractive index
  */
-double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, double E)
+double SellmeierEqn(double wl_um2, double A, double B, double C, double D, double E)
 {
     return sqrt(A + (B / (wl_um2 + C)) + (D / (wl_um2 + E)));
 }
@@ -171,7 +171,7 @@ double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, doub
  * @param F 
  * @return double refractive index
  */
-double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, double E, double F)
+double SellmeierEqn(double wl_um2, double A, double B, double C, double D, double E, double F)
 {
     return sqrt((A * wl_um2 / (wl_um2 - B)) + (C * wl_um2 / (wl_um2 - D)) + (E * wl_um2 / (wl_um2 - F)) + 1);
 }

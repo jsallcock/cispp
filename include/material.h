@@ -21,17 +21,17 @@ struct MaterialProperties
  * 
  * @return MaterialProperties 
  */
-cispp::MaterialProperties get_material_properties(std::string material_name);
+cispp::MaterialProperties GetMaterialProperties(std::string material_name);
 
-std::pair<double, double> get_refractive_indices(double wavelength, cispp::MaterialProperties &mp);
+std::pair<double, double> GetRefractiveIndices(double wavelength, cispp::MaterialProperties &mp);
 
-double get_kappa(double wavelength, cispp::MaterialProperties &mp);
+double GetKappa(double wavelength, cispp::MaterialProperties &mp);
 
-double sellmeier_eqn(double wl_um2, double A, double B, double C, double D);
+double SellmeierEqn(double wl_um2, double A, double B, double C, double D);
 
-double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, double E);
+double SellmeierEqn(double wl_um2, double A, double B, double C, double D, double E);
 
-double sellmeier_eqn(double wl_um2, double A, double B, double C, double D, double E, double F);
+double SellmeierEqn(double wl_um2, double A, double B, double C, double D, double E, double F);
 
 
 } // namespace cispp

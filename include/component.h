@@ -15,7 +15,7 @@ namespace cispp {
  * @param angle angle of rotation in radians, anti-clockwise from x-axis.
  * @return rotation matrix
  */
-Eigen::Matrix4d get_rotation_matrix(double angle);
+Eigen::Matrix4d GetRotationMatrix(double angle);
 
 
 /**
@@ -51,51 +51,51 @@ class Component
      * @brief Transmittance for light ray linearly polarised in alignment with component axis
      * 
      * @param wavelength wavelength of light (metres)
-     * @param inc_angle incidence angle of light (radians)
+     * @param incidence_angle incidence angle of light (radians)
      * @param azim_angle azimuthal angle of light (radians)
      * @return double 
      */
-    virtual double get_t1(double wavelength, double inc_angle, double azim_angle) = 0;
+    virtual double GetT1(double wavelength, double incidence_angle, double azim_angle) = 0;
 
     /**
      * @brief Transmittance for light ray linearly polarised orthogonal to component axis
      * 
      * @param wavelength wavelength of light ray (metres)
-     * @param inc_angle incidence angle of light ray (radians)
+     * @param incidence_angle incidence angle of light ray (radians)
      * @param azim_angle azimuthal angle of light ray (radians)
      * @return double 
      */
-    virtual double get_t2(double wavelength, double inc_angle, double azim_angle) = 0;
+    virtual double GetT2(double wavelength, double incidence_angle, double azim_angle) = 0;
 
     /**
      * @brief Retardance in radians
      * 
      * @param wavelength wavelength of light ray (metres)
-     * @param inc_angle incidence angle of light ray (radians)
+     * @param incidence_angle incidence angle of light ray (radians)
      * @param azim_angle azimuthal angle of light ray (radians)
      * @return double 
      */
-    virtual double get_delay(double wavelength, double inc_angle, double azim_angle) = 0;
+    virtual double GetDelay(double wavelength, double incidence_angle, double azim_angle) = 0;
 
     /**
     * @brief Calculate Mueller matrix for light ray
     * 
     * @param wavelength wavelength of light ray (metres)
-    * @param inc_angle incidence angle of light ray (radians)
+    * @param incidence_angle incidence angle of light ray (radians)
     * @param azim_angle azimuthal angle of light ray (radians) 
     * @return Matrix4d 
     */
-    virtual Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle);
+    virtual Eigen::Matrix4d GetMuellerMatrix(double wavelength, double incidence_angle, double azim_angle);
 
-    virtual bool is_polariser() {
+    virtual bool IsIdealPolariser() {
         return false;
     }
 
-    virtual bool is_retarder() {
+    virtual bool IsIdealRetarder() {
         return false;
     }
 
-    virtual bool is_quarterwaveplate() {
+    virtual bool IsIdealQuarterWaveplate() {
         return false;
     }
 };
@@ -122,23 +122,23 @@ class Polariser: public Component
     : Component(orientation, tilt_x, tilt_y)
     {}
 
-    double get_t1(double wavelength, double inc_angle, double azim_angle) override {
+    double GetT1(double wavelength, double incidence_angle, double azim_angle) override {
         return 1;
     }
 
-    double get_t2(double wavelength, double inc_angle, double azim_angle) override {
+    double GetT2(double wavelength, double incidence_angle, double azim_angle) override {
         return 0;
     }
 
-    double get_delay(double wavelength, double inc_angle, double azim_angle) override {
+    double GetDelay(double wavelength, double incidence_angle, double azim_angle) override {
         return 0;
     }
 
-    Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
+    Eigen::Matrix4d GetMuellerMatrix(double wavelength, double incidence_angle, double azim_angle) override;
 
-    Eigen::Matrix4d get_mueller_matrix();
+    Eigen::Matrix4d GetMuellerMatrix();
 
-    bool is_polariser() override {
+    bool IsIdealPolariser() override {
         return true;
     }
 };
@@ -163,17 +163,17 @@ class Retarder: public Component
     : Component(orientation, tilt_x, tilt_y)
     {}
 
-    double get_t1(double wavelength, double inc_angle, double azim_angle) override {
+    double GetT1(double wavelength, double incidence_angle, double azim_angle) override {
         return 1;
     }
 
-    double get_t2(double wavelength, double inc_angle, double azim_angle) override {
+    double GetT2(double wavelength, double incidence_angle, double azim_angle) override {
         return 1;
     }
 
-    Eigen::Matrix4d get_mueller_matrix(double wavelength, double inc_angle, double azim_angle) override;
+    Eigen::Matrix4d GetMuellerMatrix(double wavelength, double incidence_angle, double azim_angle) override;
 
-    bool is_retarder() override {
+    bool IsIdealRetarder() override {
         return true;
     }
 
@@ -201,11 +201,11 @@ class QuarterWaveplate: public Retarder
     : Retarder(orientation, tilt_x, tilt_y)
     {}
 
-    double get_delay(double wavelength, double inc_angle, double azim_angle) override {
+    double GetDelay(double wavelength, double incidence_angle, double azim_angle) override {
         return M_PI / 2;
     }
 
-    bool is_quarterwaveplate() override {
+    bool IsIdealQuarterWaveplate() override {
         return true;
     }
 };
@@ -231,7 +231,7 @@ class HalfWaveplate: public Retarder
     : Retarder(orientation, tilt_x, tilt_y)
     {}
 
-    double get_delay(double wavelength, double inc_angle, double azim_angle) override {
+    double GetDelay(double wavelength, double incidence_angle, double azim_angle) override {
         return M_PI;
     }
 };
@@ -269,7 +269,7 @@ class UniaxialCrystal: public Retarder
     : Retarder(orientation, tilt_x, tilt_y), 
       thickness(thickness), 
       cut_angle(cut_angle),
-      material(get_material_properties(material_name))
+      material(GetMaterialProperties(material_name))
     {}
 
 
@@ -296,7 +296,7 @@ class UniaxialCrystal: public Retarder
       material(material_properties)
     {}
     
-    double get_delay(double wavelength, double inc_angle, double azim_angle) override;
+    double GetDelay(double wavelength, double incidence_angle, double azim_angle) override;
 };
 
 
@@ -306,7 +306,7 @@ class UniaxialCrystal: public Retarder
  */
 class SavartPlate: public Retarder
 {
-    double get_delay(double wavelength, double inc_angle, double azim_angle) override;
+    double GetDelay(double wavelength, double angle_incidence, double azim_angle) override;
 };
 
 
@@ -318,7 +318,7 @@ class SavartPlate: public Retarder
  * @return true 
  * @return false 
  */
-bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
+bool TestAlign90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
 
 
 /**
@@ -329,7 +329,7 @@ bool test_align90(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c
  * @return true 
  * @return false 
  */
-bool test_align45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
+bool TestAlign45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2);
 
 
 } // namespace cispp

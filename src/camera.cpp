@@ -87,25 +87,25 @@ double cispp::Camera::get_pixelated_phase_mask(double x, double y)
 }
 
 
-Eigen::Matrix4d cispp::Camera::get_mueller_matrix(double x, double y)
+Eigen::Matrix4d cispp::Camera::GetMuellerMatrix(double x, double y)
 {
     size_t ix = get_pixel_idx_x(x);
     size_t iy = get_pixel_idx_y(y);
 
     if (ix % 2 == 0){
         if (iy % 2 == 0){
-            return Polariser(0).get_mueller_matrix();
+            return Polariser(0).GetMuellerMatrix();
         }
         else {
-            return Polariser(3 * M_PI / 4).get_mueller_matrix();
+            return Polariser(3 * M_PI / 4).GetMuellerMatrix();
         }
     }
     else {
         if (iy % 2 == 0){
-            return Polariser(M_PI / 4).get_mueller_matrix();
+            return Polariser(M_PI / 4).GetMuellerMatrix();
         }
         else {
-            return Polariser(M_PI / 2).get_mueller_matrix();
+            return Polariser(M_PI / 2).GetMuellerMatrix();
         }
     }
 }
