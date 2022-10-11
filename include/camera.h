@@ -62,10 +62,10 @@ class Camera
       type(type),
       sensor_halfwidth(0.5 * pixel_size * sensor_format_x),
       sensor_halfheight(0.5 * pixel_size * sensor_format_y),
-      pixel_centres_x(get_pixel_centres_x()),
-      pixel_centres_y(get_pixel_centres_y()),
-      pixel_lbounds_x(get_pixel_lbounds_x()),
-      pixel_lbounds_y(get_pixel_lbounds_y())
+      pixel_centres_x(GetPixelCentresX()),
+      pixel_centres_y(GetPixelCentresY()),
+      pixel_lbounds_x(GetPixelLowerBoundsX()),
+      pixel_lbounds_y(GetPixelLowerBoundsY())
     {}
 
 
@@ -83,10 +83,10 @@ class Camera
       cam_noise(2),
       sensor_halfwidth(0.5 * pixel_size * sensor_format_x),
       sensor_halfheight(0.5 * pixel_size * sensor_format_y),
-      pixel_centres_x(get_pixel_centres_x()),
-      pixel_centres_y(get_pixel_centres_y()),
-      pixel_lbounds_x(get_pixel_lbounds_x()),
-      pixel_lbounds_y(get_pixel_lbounds_y())
+      pixel_centres_x(GetPixelCentresX()),
+      pixel_centres_y(GetPixelCentresY()),
+      pixel_lbounds_x(GetPixelLowerBoundsX()),
+      pixel_lbounds_y(GetPixelLowerBoundsY())
     {}
 
     /**
@@ -94,28 +94,28 @@ class Camera
      * 
      * @return std::vector<double> 
      */
-    std::vector<double> get_pixel_centres_x() const;
+    std::vector<double> GetPixelCentresX() const;
 
     /**
      * @brief Get x-position of pixel lower bounds in metres
      * 
      * @return std::vector<double> 
      */
-    std::vector<double> get_pixel_lbounds_x() const;
+    std::vector<double> GetPixelLowerBoundsX() const;
 
     /**
      * @brief Get y-position of pixel centres in metres
      * 
      * @return std::vector<double> 
      */
-    std::vector<double> get_pixel_centres_y() const;
+    std::vector<double> GetPixelCentresY() const;
 
     /**
      * @brief Get y-position of pixel lower bounds in metres
      * 
      * @return std::vector<double> 
      */
-    std::vector<double> get_pixel_lbounds_y() const;
+    std::vector<double> GetPixelLowerBoundsY() const;
 
     /**
      * @brief Get x-index of pixel by x-position in metres
@@ -123,7 +123,7 @@ class Camera
      * @param x 
      * @return size_t 
      */
-    size_t get_pixel_idx_x(double x);
+    size_t GetPixelIndexX(double x);
 
     /**
      * @brief Get y-index of pixel by y-position in metres
@@ -131,7 +131,7 @@ class Camera
      * @param y 
      * @return size_t 
      */
-    size_t get_pixel_idx_y(double y);
+    size_t GetPixelIndexY(double y);
 
     /**
      * @brief Get pixelated phase mask value by xy-position in metres
@@ -140,7 +140,7 @@ class Camera
      * @param y y-pixel index
      * @return double 
      */
-    double get_pixelated_phase_mask(double x, double y);
+    double GetPixelatedPhaseMask(double x, double y);
 
     /**
      * @brief Get mueller matrix by xy-position in metres

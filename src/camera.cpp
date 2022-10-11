@@ -7,7 +7,7 @@
 namespace cispp {
 
 
-std::vector<double> cispp::Camera::get_pixel_centres_x() const
+std::vector<double> cispp::Camera::GetPixelCentresX() const
 {
     std::vector<double> px(sensor_format_x);
     for (size_t i = 0; i < sensor_format_x; i++){
@@ -17,7 +17,7 @@ std::vector<double> cispp::Camera::get_pixel_centres_x() const
 }
 
 
-std::vector<double> cispp::Camera::get_pixel_lbounds_x() const
+std::vector<double> cispp::Camera::GetPixelLowerBoundsX() const
 {
     std::vector<double> px(sensor_format_x);
     for (size_t i = 0; i < sensor_format_x; i++){
@@ -27,7 +27,7 @@ std::vector<double> cispp::Camera::get_pixel_lbounds_x() const
 }
 
 
-std::vector<double> cispp::Camera::get_pixel_centres_y() const
+std::vector<double> cispp::Camera::GetPixelCentresY() const
 {
     std::vector<double> py(sensor_format_y);
     for (size_t i = 0; i < sensor_format_y; i++){
@@ -37,7 +37,7 @@ std::vector<double> cispp::Camera::get_pixel_centres_y() const
 }
 
 
-std::vector<double> cispp::Camera::get_pixel_lbounds_y() const
+std::vector<double> cispp::Camera::GetPixelLowerBoundsY() const
 {
     std::vector<double> py(sensor_format_y);
     for (size_t i = 0; i < sensor_format_y; i++){
@@ -47,7 +47,7 @@ std::vector<double> cispp::Camera::get_pixel_lbounds_y() const
 }
 
 
-size_t cispp::Camera::get_pixel_idx_x(double x)
+size_t cispp::Camera::GetPixelIndexX(double x)
 {
     std::vector<double>::iterator it;
     it = std::lower_bound(pixel_lbounds_x.begin(), pixel_lbounds_x.end(), x);
@@ -55,7 +55,7 @@ size_t cispp::Camera::get_pixel_idx_x(double x)
 }
 
 
-size_t cispp::Camera::get_pixel_idx_y(double y)
+size_t cispp::Camera::GetPixelIndexY(double y)
 {
     std::vector<double>::iterator it;
     it = std::lower_bound(pixel_lbounds_y.begin(), pixel_lbounds_y.end(), y);
@@ -63,10 +63,10 @@ size_t cispp::Camera::get_pixel_idx_y(double y)
 }
 
 
-double cispp::Camera::get_pixelated_phase_mask(double x, double y)
+double cispp::Camera::GetPixelatedPhaseMask(double x, double y)
 {
-    size_t ix = get_pixel_idx_x(x);
-    size_t iy = get_pixel_idx_y(y);
+    size_t ix = GetPixelIndexX(x);
+    size_t iy = GetPixelIndexY(y);
 
     if (ix % 2 == 0){
         if (iy % 2 == 0){
@@ -89,8 +89,8 @@ double cispp::Camera::get_pixelated_phase_mask(double x, double y)
 
 Eigen::Matrix4d cispp::Camera::GetMuellerMatrix(double x, double y)
 {
-    size_t ix = get_pixel_idx_x(x);
-    size_t iy = get_pixel_idx_y(y);
+    size_t ix = GetPixelIndexX(x);
+    size_t iy = GetPixelIndexY(y);
 
     if (ix % 2 == 0){
         if (iy % 2 == 0){

@@ -36,7 +36,7 @@ int main()
     {
         std::cout << i << std::endl;
         std::cout << camera.pixel_centres_y[i] << std::endl;
-        std::cout << camera.get_pixel_idx_y(camera.pixel_centres_y[i]) << std::endl;
+        std::cout << camera.GetPixelIndexY(camera.pixel_centres_y[i]) << std::endl;
         std::cout << std::endl;
     }   
 }

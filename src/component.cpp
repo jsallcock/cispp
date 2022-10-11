@@ -25,11 +25,11 @@ Eigen::Matrix4d GetRotationMatrix(double angle)
 }
 
 
-Eigen::Matrix4d Component::GetMuellerMatrix(double wavelength, double inc_angle, double azim_angle)
+Eigen::Matrix4d Component::GetMuellerMatrix(double wavelength, double incidence_angle, double azimuthal_angle)
 {
-    double delay = GetDelay(wavelength, inc_angle, azim_angle);
-    double t1 = GetT1(wavelength, inc_angle, azim_angle);
-    double t2 = GetT2(wavelength, inc_angle, azim_angle);
+    double delay = GetDelay(wavelength, incidence_angle, azimuthal_angle);
+    double t1 = GetT1(wavelength, incidence_angle, azimuthal_angle);
+    double t2 = GetT2(wavelength, incidence_angle, azimuthal_angle);
     double sum = (t1 + t2) / 2;
     double diff = (t1 - t2) / 2;
     double prod = 2 * sqrt(t1 * t2);
@@ -60,14 +60,14 @@ Eigen::Matrix4d Polariser::GetMuellerMatrix()
 }
 
 
-Eigen::Matrix4d Polariser::GetMuellerMatrix(double wavelength, double inc_angle, double azim_angle) {
+Eigen::Matrix4d Polariser::GetMuellerMatrix(double wavelength, double incidence_angle, double azimuthal_angle) {
     return GetMuellerMatrix();
 }
 
 
-Eigen::Matrix4d Retarder::GetMuellerMatrix(double wavelength, double inc_angle, double azim_angle)
+Eigen::Matrix4d Retarder::GetMuellerMatrix(double wavelength, double incidence_angle, double azimuthal_angle)
 {
-    double delay = GetDelay(wavelength, inc_angle, azim_angle);
+    double delay = GetDelay(wavelength, incidence_angle, azimuthal_angle);
     double sd = sin(delay);
     double cd = cos(delay);
     Eigen::Matrix4d m;
@@ -82,17 +82,17 @@ Eigen::Matrix4d Retarder::GetMuellerMatrix(double wavelength, double inc_angle, 
 }
 
 
-double UniaxialCrystal::GetDelay(double wavelength, double inc_angle, double azim_angle)
+double UniaxialCrystal::GetDelay(double wavelength, double incidence_angle, double azimuthal_angle)
 {
     std::pair<double, double> neno = GetRefractiveIndices(wavelength, material);
     double ne = neno.first; 
     double no = neno.second;
 
-    double s_inc = sin(inc_angle);
+    double s_inc = sin(incidence_angle);
     double s_cut = sin(cut_angle);
     double c_cut = cos(cut_angle);
-    double s_azim = sin(azim_angle);
-    double c_azim = cos(azim_angle);
+    double s_azim = sin(azimuthal_angle);
+    double c_azim = cos(azimuthal_angle);
     double s_inc2 = pow(s_inc, 2);
     double s_cut2 = pow(s_cut, 2);
     double c_cut2 = pow(c_cut, 2);

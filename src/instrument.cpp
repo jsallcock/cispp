@@ -347,7 +347,7 @@ void InstrumentSingleDelayPixelated::Capture(double wavelength, double flux, vec
             double inc_angle = GetIncidenceAngle(x, y, components[1]);
             double azim_angle = GetAzimuthalAngle(x, y, components[1]);
             double delay = components[1]->GetDelay(wavelength, inc_angle, azim_angle);
-            double mask = camera.get_pixelated_phase_mask(x, y);
+            double mask = camera.GetPixelatedPhaseMask(x, y);
             (*image)[i + idx_col] = static_cast<unsigned short int>((flux / 4) * (1 + cos(delay + mask)));
         }
     }
@@ -375,7 +375,7 @@ void InstrumentSingleDelayPixelated::Capture(vector<double> wavelength, vector<d
             double x = camera.pixel_centres_x[ix];
             double inc_angle = GetIncidenceAngle(x, y, components[1]);
             double azim_angle = GetAzimuthalAngle(x, y, components[1]);
-            double mask = camera.get_pixelated_phase_mask(x, y);
+            double mask = camera.GetPixelatedPhaseMask(x, y);
 
             for (size_t iwl=0; iwl < wavelength.size(); iwl++) 
             {

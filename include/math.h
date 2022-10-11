@@ -10,7 +10,7 @@ namespace cispp {
 
 
 /**
- * @brief numerical integration using the trapezoidal rule
+ * @brief numerical integration over a std::vector using the trapezoidal rule
  * 
  * @param x 
  * @param y 
