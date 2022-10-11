@@ -13,3 +13,4 @@ TODO:
 - Output images to HDF5
 - Output images to a real image format (not .pbm)
 - Parallelise
+- Python bindings using [pybind11](https://github.com/pybind/pybind11)
