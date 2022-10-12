@@ -1,6 +1,7 @@
 #ifndef CISPP_MATH_H
 #define CISPP_MATH_H
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <vector>
 #include <iostream>
@@ -35,7 +36,11 @@ T trapz(std::vector<T> x, std::vector<T> y)
  * @param p 
  * @return double 
  */
-double wrap(double p);
+double wrap(double p)
+{
+    double period = 2 * M_PI;
+    return fmod((p + period / 2), period) - (period / 2);
+}
 
 
 } // namespace cispp
