@@ -11,15 +11,14 @@ namespace cispp {
 
 Eigen::Matrix4d GetRotationMatrix(double angle)
 {
-    double a2 = 2 * angle;
-    double s2 = sin(a2);
-    double c2 = cos(a2);
-    Eigen::Matrix4d m;
+    const double s = sin(2 * angle);
+    const double c = cos(2 * angle);
 
-    m << 1,   0,   0,   0, 
-         0,  c2,  s2,   0,
-         0, -s2,  c2,   0,
-         0,   0,   0,   1;
+    Eigen::Matrix4d m;
+    m << 1,  0,  0,  0, 
+         0,  c,  s,  0,
+         0, -s,  c,  0,
+         0,  0,  0,  1;
 
     return m;
 }
@@ -27,16 +26,15 @@ Eigen::Matrix4d GetRotationMatrix(double angle)
 
 Eigen::Matrix4d Component::GetMuellerMatrix(double wavelength, double incidence_angle, double azimuthal_angle)
 {
-    double delay = GetDelay(wavelength, incidence_angle, azimuthal_angle);
-    double t1 = GetT1(wavelength, incidence_angle, azimuthal_angle);
-    double t2 = GetT2(wavelength, incidence_angle, azimuthal_angle);
-    double sum = (t1 + t2) / 2;
-    double diff = (t1 - t2) / 2;
-    double prod = 2 * sqrt(t1 * t2);
-    double psd = prod * sin(delay);
-    double pcd = prod * cos(delay);
+    const double delay = GetDelay(wavelength, incidence_angle, azimuthal_angle);
+    const double t1 = GetT1(wavelength, incidence_angle, azimuthal_angle);
+    const double t2 = GetT2(wavelength, incidence_angle, azimuthal_angle);
+    const double sum = (t1 + t2) / 2;
+    const double diff = (t1 - t2) / 2;
+    const double psd = 2 * sqrt(t1 * t2) * sin(delay);
+    const double pcd = 2 * sqrt(t1 * t2) * cos(delay);
+    
     Eigen::Matrix4d m;
-
     m <<  sum, diff,    0,    0, 
          diff,  sum,    0,    0,
             0,    0,  pcd,  psd,

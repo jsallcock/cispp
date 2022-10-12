@@ -9,7 +9,7 @@
 namespace cispp {
 
 
-const double SPEED_OF_LIGHT = 2.99792458e8;
+constexpr double SPEED_OF_LIGHT = 2.99792458e8;
 
 
 /**

@@ -37,10 +37,10 @@ MaterialProperties GetMaterialProperties(std::string material_name)
 
 std::pair<double, double> GetRefractiveIndices(double wavelength, MaterialProperties &mp)
 {
-    size_t nce = mp.sellmeier_e.size();
-    size_t nco = mp.sellmeier_o.size();
+    const size_t nce = mp.sellmeier_e.size();
+    const size_t nco = mp.sellmeier_o.size();
+    const double wl_um2 = pow(wavelength * 1e6, 2); 
     assert (nce == nco);
-    double wl_um2 = pow(wavelength * 1e6, 2); 
     double ne, no;
     
     switch(nce)

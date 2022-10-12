@@ -100,10 +100,9 @@ bool TestCaptureInstVsMueller(std::filesystem::path fp_root, std::string instnam
 int main (int argc, char **argv)
 {
     auto fp_root = std::filesystem::absolute(std::filesystem::path(argv[0])).parent_path().parent_path();
-
-
     std::vector<std::string> instnames { "SingleDelayLinear", "SingleDelayPixelated" };
     std::vector<std::string> specnames { "Monochrome", "Spectrum" };
+    std::cout << '\n';
 
     for (size_t i=0; i < instnames.size(); i++)
     {
