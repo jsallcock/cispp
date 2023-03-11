@@ -18,7 +18,7 @@
  * @return true 
  * @return false 
  */
-bool TestImagesSame(std::vector<unsigned short int> &im1, std::vector<unsigned short int> &im2)
+bool Test2ImagesSame(std::vector<unsigned short int> &im1, std::vector<unsigned short int> &im2)
 {
     assert (im1.size() == im2.size());
     for (size_t i = 0; i < im1.size(); i++)
@@ -93,7 +93,7 @@ bool TestCaptureInstVsMueller(std::filesystem::path fp_root, std::string instnam
     inst->SaveImage("TestCapture" + specname + instname + ".pbm", &image);
     inst_m->SaveImage("TestCapture" + specname + instname + "ForceMueller.pbm", &image_m);
 
-    return TestImagesSame(image, image_m);
+    return Test2ImagesSame(image, image_m);
 }
 
 

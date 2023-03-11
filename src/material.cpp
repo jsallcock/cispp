@@ -14,7 +14,6 @@ MaterialProperties GetMaterialProperties(std::string material_name)
 {
     MaterialProperties mp = {};
     mp.name = material_name;
-    // YAML::Node data = YAML::LoadFile("../data/material.yaml");
     YAML::Node data = YAML::LoadFile("./data/material.yaml");
 
     if (!data[material_name]["sellmeier_coefficients"]){

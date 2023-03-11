@@ -8,6 +8,7 @@ set(CMAKE_CXX_FLAGS "-Wall -I -mmacosx-version-min=12.5 -std=c++17 -O3")
 list(APPEND includes "${PROJECT_SOURCE_DIR}")
 list(APPEND includes "/usr/local/include")
 message(STATUS "includes= ${includes}")
+message(STATUS "PROJECT_SOURCE_DIR= ${PROJECT_SOURCE_DIR}")
 
 find_library(
     LIB_YAML 
@@ -17,43 +18,43 @@ find_library(
 message(STATUS "LIB_YAML= ${LIB_YAML}")
 
 # LIBS
-add_library(LIB_MATERIAL SHARED "${PROJECT_SOURCE_DIR}/src/material.cpp")
-target_link_libraries(LIB_MATERIAL PUBLIC ${LIB_YAML})
-target_include_directories(LIB_MATERIAL PUBLIC ${includes})
+add_library(material SHARED "${PROJECT_SOURCE_DIR}/src/material.cpp")
+target_link_libraries(material PUBLIC ${LIB_YAML})
+target_include_directories(material PUBLIC ${includes})
 
-add_library(LIB_SPECTRUM SHARED "${PROJECT_SOURCE_DIR}/src/spectrum.cpp")
-target_include_directories(LIB_SPECTRUM PUBLIC ${includes})
+add_library(spectrum SHARED "${PROJECT_SOURCE_DIR}/src/spectrum.cpp")
+target_include_directories(spectrum PUBLIC ${includes})
 
-add_library(LIB_COHERENCE SHARED "${PROJECT_SOURCE_DIR}/src/coherence.cpp")
-target_include_directories(LIB_COHERENCE PUBLIC ${includes})
+add_library(coherence SHARED "${PROJECT_SOURCE_DIR}/src/coherence.cpp")
+target_include_directories(coherence PUBLIC ${includes})
 
-add_library(LIB_COMPONENT SHARED "${PROJECT_SOURCE_DIR}/src/component.cpp")
-target_link_libraries(LIB_COMPONENT PUBLIC LIB_MATERIAL)
-target_include_directories(LIB_COMPONENT PUBLIC ${includes})
+add_library(component SHARED "${PROJECT_SOURCE_DIR}/src/component.cpp")
+target_link_libraries(component PUBLIC material)
+target_include_directories(component PUBLIC ${includes})
 
-add_library(LIB_CAMERA SHARED "${PROJECT_SOURCE_DIR}/src/camera.cpp")
-target_link_libraries(LIB_CAMERA PUBLIC LIB_COMPONENT)
-target_include_directories(LIB_CAMERA PUBLIC ${includes})
+add_library(camera SHARED "${PROJECT_SOURCE_DIR}/src/camera.cpp")
+target_link_libraries(camera PUBLIC component)
+target_include_directories(camera PUBLIC ${includes})
 
-add_library(LIB_INSTRUMENT SHARED "${PROJECT_SOURCE_DIR}/src/instrument.cpp")
-target_link_libraries(LIB_INSTRUMENT PUBLIC LIB_COMPONENT LIB_CAMERA)
-target_include_directories(LIB_INSTRUMENT PUBLIC ${includes})
+add_library(instrument SHARED "${PROJECT_SOURCE_DIR}/src/instrument.cpp")
+target_link_libraries(instrument PUBLIC component camera)
+target_include_directories(instrument PUBLIC ${includes})
 
 # TESTS
 add_executable(test_material "${PROJECT_SOURCE_DIR}/test/test_material.cpp")
-target_link_libraries(test_material PUBLIC LIB_MATERIAL)
+target_link_libraries(test_material PUBLIC material)
 
 add_executable(test_spectrum "${PROJECT_SOURCE_DIR}/test/test_spectrum.cpp")
-target_link_libraries(test_spectrum PUBLIC LIB_SPECTRUM)
+target_link_libraries(test_spectrum PUBLIC spectrum)
 
 add_executable(test_coherence "${PROJECT_SOURCE_DIR}/test/test_coherence.cpp")
-target_link_libraries(test_coherence PUBLIC LIB_COHERENCE LIB_SPECTRUM)
+target_link_libraries(test_coherence PUBLIC coherence spectrum)
 
 add_executable(test_component "${PROJECT_SOURCE_DIR}/test/test_component.cpp")
-target_link_libraries(test_component PUBLIC LIB_COMPONENT)
+target_link_libraries(test_component PUBLIC component)
 
 add_executable(test_camera "${PROJECT_SOURCE_DIR}/test/test_camera.cpp")
-target_link_libraries(test_camera PUBLIC LIB_CAMERA)
+target_link_libraries(test_camera PUBLIC camera)
 
 add_executable(test_instrument "${PROJECT_SOURCE_DIR}/test/test_instrument.cpp")
-target_link_libraries(test_instrument PUBLIC LIB_INSTRUMENT LIB_SPECTRUM)
+target_link_libraries(test_instrument PUBLIC instrument spectrum)

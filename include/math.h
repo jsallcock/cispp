@@ -9,7 +9,6 @@
 
 namespace cispp {
 
-
 /**
  * @brief numerical integration over a std::vector using the trapezoidal rule
  * 

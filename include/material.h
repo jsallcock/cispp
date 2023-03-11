@@ -8,6 +8,9 @@
 namespace cispp {
 
 
+// std::string fpath_material_data = ;
+
+
 struct MaterialProperties
 {
     std::string name {};

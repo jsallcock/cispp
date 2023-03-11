@@ -1,3 +1,4 @@
+*.pages
 *.DS_Store
 *.vscode
 build/*
