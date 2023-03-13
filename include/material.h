@@ -1,5 +1,5 @@
-#ifndef CISPP_MATERIAL_H
-#define CISPP_MATERIAL_H
+#pragma once
+
 #include <string>
 #include <vector>
 #include <cmath>
@@ -38,4 +38,3 @@ double SellmeierEqn(double wl_um2, double A, double B, double C, double D, doubl
 
 
 } // namespace cispp
-#endif

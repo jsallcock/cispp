@@ -1,5 +1,4 @@
-#ifndef CISPP_COHERENCE_H
-#define CISPP_COHERENCE_H
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -34,4 +33,3 @@ std::complex<double> coherence_gaussian(double wl0, double wlsigma, double flux,
 
 
 } // namespace cispp
-#endif

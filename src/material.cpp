@@ -1,9 +1,12 @@
+#include "include/material.h"
+
 #include <string>
 #include <iostream>
 #include <cmath>
 #include <stdexcept>
+
 #include "yaml-cpp/yaml.h"
-#include "include/material.h"
+
 
 
 namespace cispp {

@@ -18,6 +18,9 @@ find_library(
 message(STATUS "LIB_YAML= ${LIB_YAML}")
 
 # LIBS
+add_library(math SHARED "${PROJECT_SOURCE_DIR}/src/math.cpp")
+target_include_directories(math PUBLIC ${includes})
+
 add_library(material SHARED "${PROJECT_SOURCE_DIR}/src/material.cpp")
 target_link_libraries(material PUBLIC ${LIB_YAML})
 target_include_directories(material PUBLIC ${includes})
@@ -41,6 +44,9 @@ target_link_libraries(instrument PUBLIC component camera)
 target_include_directories(instrument PUBLIC ${includes})
 
 # TESTS
+add_executable(test_math "${PROJECT_SOURCE_DIR}/test/test_math.cpp")
+target_link_libraries(test_math PUBLIC math)
+
 add_executable(test_material "${PROJECT_SOURCE_DIR}/test/test_material.cpp")
 target_link_libraries(test_material PUBLIC material)
 
@@ -48,7 +54,7 @@ add_executable(test_spectrum "${PROJECT_SOURCE_DIR}/test/test_spectrum.cpp")
 target_link_libraries(test_spectrum PUBLIC spectrum)
 
 add_executable(test_coherence "${PROJECT_SOURCE_DIR}/test/test_coherence.cpp")
-target_link_libraries(test_coherence PUBLIC coherence spectrum)
+target_link_libraries(test_coherence PUBLIC coherence spectrum math)
 
 add_executable(test_component "${PROJECT_SOURCE_DIR}/test/test_component.cpp")
 target_link_libraries(test_component PUBLIC component)

@@ -1,10 +1,8 @@
-#ifndef CISPP_MATH_H
-#define CISPP_MATH_H
+#pragma once
 
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <vector>
-#include <iostream>
 
 
 namespace cispp {
@@ -28,20 +26,12 @@ T trapz(std::vector<T> x, std::vector<T> y)
     return out;
 }
 
-
 /**
  * @brief Wrap phase angle into (- pi, pi] radian interval
  * 
  * @param p 
  * @return double 
  */
-double wrap(double p)
-{
-    double period = 2 * M_PI;
-    return fmod((p + period / 2), period) - (period / 2);
-}
-
+double wrap(double p);
 
 } // namespace cispp
-#endif
-

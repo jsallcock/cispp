@@ -1,5 +1,5 @@
-#ifndef CISPP_CAMERA_H
-#define CISPP_CAMERA_H
+#pragma once
+
 #include <string>
 #include <vector>
 #include <Eigen/Dense>
@@ -154,4 +154,3 @@ class Camera
 
 
 }  // namespace cispp
-#endif

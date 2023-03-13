@@ -1,5 +1,4 @@
-#ifndef CISPP_SPECTRUM_H
-#define CISPP_SPECTRUM_H
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -54,4 +53,3 @@ Spectrum get_gaussian_multiplet();
 
 
 } // namespace cispp
-#endif

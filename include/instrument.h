@@ -1,5 +1,4 @@
-#ifndef CISPP_INSTRUMENT_H
-#define CISPP_INSTRUMENT_H
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -154,4 +153,3 @@ unique_ptr<cispp::Instrument> LoadInstrument(std::filesystem::path fp_config, bo
 
 
 } // namespace cispp
-#endif

@@ -1,6 +1,6 @@
 
-#ifndef CISPP_COMPONENT_H
-#define CISPP_COMPONENT_H
+#pragma once
+
 #include <string>
 #include <iostream>
 #include <cmath>
@@ -333,4 +333,3 @@ bool TestAlign45(std::unique_ptr<Component>& c1,  std::unique_ptr<Component>& c2
 
 
 } // namespace cispp
-#endif

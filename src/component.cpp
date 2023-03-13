@@ -1,8 +1,10 @@
+#include "include/component.h"
+
 #include <string>
 #include <iostream>
 #include <cmath>
 #include <Eigen/Dense>
-#include "include/component.h"
+
 #include "include/material.h"
 
 
