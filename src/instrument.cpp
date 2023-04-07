@@ -1,7 +1,10 @@
-#include "yaml-cpp/yaml.h"
 #include "include/instrument.h"
+
+#include "include/material.h"
 #include "include/camera.h"
-#include "include/math.h"
+#include "include/maths.h"
+
+#include "yaml-cpp/yaml.h"
 
 using std::vector;
 using std::unique_ptr;
@@ -191,7 +194,7 @@ void Instrument::Capture(double wavelength, double flux, vector<unsigned short i
 }
 
 
-void Instrument::Capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image)
+void Instrument::Capture(vector<double>& wavelength, vector<double>& spec_flux, vector<unsigned short int>* image)
 {
     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
     assert(wavelength.size() == spec_flux.size());
@@ -272,7 +275,7 @@ void InstrumentSingleDelayLinear::Capture(double wavelength, double flux, vector
 }
 
 
-void InstrumentSingleDelayLinear::Capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image)
+void InstrumentSingleDelayLinear::Capture(vector<double>& wavelength, vector<double>& spec_flux, vector<unsigned short int>* image)
 {
     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
     assert(wavelength.size() == spec_flux.size());
@@ -354,7 +357,7 @@ void InstrumentSingleDelayPixelated::Capture(double wavelength, double flux, vec
 }
 
 
-void InstrumentSingleDelayPixelated::Capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image)
+void InstrumentSingleDelayPixelated::Capture(vector<double>& wavelength, vector<double>& spec_flux, vector<unsigned short int>* image)
 {
     assert((*image).size() == camera.sensor_format_x * camera.sensor_format_y);
     assert(wavelength.size() == spec_flux.size());

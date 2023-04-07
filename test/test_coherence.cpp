@@ -1,5 +1,5 @@
 #include "include/coherence.h"
-#include "include/math.h"
+#include "include/maths.h"
 #include "include/spectrum.h"
 
 

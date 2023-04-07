@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <cstdlib>
 #include <cmath>
 #include <vector>
 #include <chrono>
@@ -9,6 +10,7 @@
 #include "include/component.h"
 #include "include/instrument.h"
 #include "include/material.h"
+#include "include/paths.h"
 #include "include/spectrum.h"
 
 
@@ -39,9 +41,10 @@ bool Test2ImagesSame(std::vector<unsigned short int> &im1, std::vector<unsigned 
  * @return true 
  * @return false 
  */
-bool TestCaptureInstVsMueller(std::filesystem::path fp_root, std::string instname, std::string specname)
+bool TestCaptureInstVsMueller(std::string instname, std::string specname)
 {
-    std::string fp_config = (((fp_root / "test") / "config") / (instname + ".yaml"));
+    std::filesystem::path rootPath = cispp::getRootPath();
+    std::string fp_config = (((rootPath / "test") / "config") / (instname + ".yaml"));
     auto inst = cispp::LoadInstrument(fp_config);
     auto inst_m = cispp::LoadInstrument(fp_config, true);  // force_mueller
     std::vector<unsigned short int> image(inst->camera.sensor_format_x * inst->camera.sensor_format_y);
@@ -97,21 +100,18 @@ bool TestCaptureInstVsMueller(std::filesystem::path fp_root, std::string instnam
 }
 
 
-int main (int argc, char **argv)
+int main ()
 {
-    auto fp_root = std::filesystem::absolute(std::filesystem::path(argv[0])).parent_path().parent_path();
     std::vector<std::string> instnames { "SingleDelayLinear", "SingleDelayPixelated" };
     std::vector<std::string> specnames { "Monochrome", "Spectrum" };
     std::cout << '\n';
 
-    for (size_t i=0; i < instnames.size(); i++)
+    for (const std::string& instname: instnames)
     {
-        for (size_t j=0; j < specnames.size(); j++)
+        for (const std::string& specname: specnames)
         {
-            std::string instname = instnames[i];
-            std::string specname = specnames[j];
             std::cout << "TestCapture" + specname + instname + ":\n";
-            if (TestCaptureInstVsMueller(fp_root, instname, specname))
+            if (TestCaptureInstVsMueller(instname, specname))
             {
                 std::cout << "passed";
             }

@@ -8,7 +8,9 @@
 #include <Eigen/Dense>
 #include <iostream>
 #include <fstream>
+
 #include "yaml-cpp/yaml.h"
+
 #include "include/camera.h"
 #include "include/component.h"
 
@@ -103,7 +105,7 @@ class Instrument
      * @param flux photon flux
      * @param image pointer to image vector (row-major order)
      */
-    virtual void Capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image);
+    virtual void Capture(vector<double>& wavelength, vector<double>& spec_flux, vector<unsigned short int>* image);
 };
 
 
@@ -121,7 +123,7 @@ class InstrumentSingleDelayLinear: public Instrument
 
     void Capture(double wavelength, double flux, vector<unsigned short int>* image) override;
 
-    void Capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image) override;
+    void Capture(vector<double>& wavelength, vector<double>& spec_flux, vector<unsigned short int>* image) override;
 };
 
 
@@ -139,7 +141,7 @@ class InstrumentSingleDelayPixelated: public Instrument
 
     void Capture(double wavelength, double flux, vector<unsigned short int>* image) override;
 
-    void Capture(vector<double> wavelength, vector<double> spec_flux, vector<unsigned short int>* image) override;
+    void Capture(vector<double>& wavelength, vector<double>& spec_flux, vector<unsigned short int>* image) override;
 };
 
 /**

@@ -7,17 +7,12 @@
 
 namespace cispp {
 
-
-// std::string fpath_material_data = ;
-
-
 struct MaterialProperties
 {
     std::string name {};
     std::vector<double> sellmeier_e;
     std::vector<double> sellmeier_o;
 };
-
 
 /**
  * @brief get default material properties by material name

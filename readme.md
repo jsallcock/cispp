@@ -13,6 +13,7 @@ Build:
 - `$ cmake -S . -B build`
 - `$ cd build`
 - `$ make`
+- Set environment variable `CISPP_ROOT` to point to the project root.
 
 TODO:
 - Output images to HDF5

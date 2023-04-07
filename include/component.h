@@ -5,8 +5,8 @@
 #include <iostream>
 #include <cmath>
 #include <Eigen/Dense>
-#include "include/material.h"
 
+#include "include/material.h"
 
 namespace cispp {
 
@@ -288,7 +288,7 @@ class UniaxialCrystal: public Retarder
         double tilt_y,
         double thickness, 
         double cut_angle,
-        MaterialProperties material_properties
+        cispp::MaterialProperties material_properties
     )
     : Retarder(orientation, tilt_x, tilt_y), 
       thickness(thickness), 

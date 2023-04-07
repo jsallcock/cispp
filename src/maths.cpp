@@ -1,4 +1,4 @@
-#include "include/math.h"
+#include "include/maths.h"
 
 namespace cispp {
 

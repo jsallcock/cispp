@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <complex>
-#include "include/math.h"
+#include "include/maths.h"
 #include "include/spectrum.h"
 
 

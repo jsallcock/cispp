@@ -1,23 +1,25 @@
 #include "include/material.h"
 
-#include <string>
-#include <iostream>
 #include <cmath>
+#include <cstdlib>
+#include <filesystem>
 #include <stdexcept>
+#include <string>
 
 #include "yaml-cpp/yaml.h"
 
-
-
 namespace cispp {
-
-
 
 MaterialProperties GetMaterialProperties(std::string material_name)
 {
     MaterialProperties mp = {};
     mp.name = material_name;
-    YAML::Node data = YAML::LoadFile("./data/material.yaml");
+    
+    std::filesystem::path filePath = std::getenv("CISPP_ROOT");
+    filePath /= "data";
+    filePath /= "material.yaml";
+    YAML::Node data = YAML::LoadFile(filePath);
+    //std::filesystem::path implicitly convertable to std::basic_string
 
     if (!data[material_name]["sellmeier_coefficients"]){
         throw std::logic_error("invalid material_name");

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "include/math.h"
+#include "include/maths.h"
 
 
 bool test_trapz()
